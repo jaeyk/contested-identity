@@ -37,7 +37,15 @@ In the rest of the document, I document how I have **wrangled**, **analyzed**, a
 
 ### Data wrangling [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/01_data_wrangling.Rmd)]
 
+- Nothing particular here. I dropped irrelevant columns from the survey data and changed key variable names to make them more intelligible.
+
 ### Data analysis and visualization [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/02_data_analysis.Rmd)]
+
+- Average treatment effect (ATE): As alluded, I used difference-in-means as an estimator the average treatment effect. As can be seen below, using `dplyr` is quite handy in dealing with multiple treatment groups and treatment conditions. I calculated 95% confidence intervals using two-paired t-tests.
+
+- Conditional average treatment effect (CATE): Ideology was used as a blocking variable. Thus, ideology is unrelated with the assignment process. I subdivided the survey data according to the respondents' ideology position and calculated difference-in-means within each strata. These difference-in-means are unbiased estimators of average treatment effects conditional on ideology.
+
+- Bootstrapping confidence intervals: CATE requires subgroup analysis. Subgroup analysis reduces sample size and increase type II error (false negative). Particularly concerning is t-tests are vulnerable to outliers. When we have few observations, the effects of outliers could get stronger. To address this concern, I also calculated bootstrapped 95% confidence intervals. Bootstrapping is a non-parametric method and it helps get more precise estimates of confidence intervals.
 
 ```{R}
 diff_means_test <- function(data, treat, direct, indirect) {
@@ -74,12 +82,17 @@ diff_means_test <- function(data, treat, direct, indirect) {
 ```
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/ate_results_plot.png)
-Figure 1. Estimated Average Treatment Effect
+Figure 1. Estimated Average Treatment Effects
+
+Figure 1 shows estimated average treatment effects. We only find evidence for indirect bias toward North Korean refugees but not direct bias. Another noticeable fact is the extent to which South Korean citizens hold bias toward North Korean refugees is similar to their attitude toward Indonesian migrant workers.  
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
-Figure 2. Estimated Conditional Average Treatment Effect with or without Bootstrapped Confidence Intervals
+Figure 2. Estimated Conditional Average Treatment Effects with or without Bootstrapped Confidence Intervals
+
+Figure 2 compares estimated conditional average treatment effects with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exits with respect to South Korean citizens' attitudes towards North Korean refugees.
 
 ## Conclusion remarks
 
-- We have found something interesting about the relationship between party ID and responses. However, as I did not use party ID as a blocking variable, this relationship is an association.
-- List experiments also have many problems. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.
+- In the additional analysis, we have found something interesting about how party ID interacts with responses. However, we are cautioned to make a strong claim about this pattern because we did not use party ID as a blocking variable. This relationship is an association.
+- Ideological moderates are not exactly positioned in the middle. They could be leaning towards either side of the ideological spectrum. If that were the case, replacing their responses with NAs and then imputing them using multiple imputation could be one way to investigate how ideology influences the South Korean citizen-North Korean refugee relationship in South Korea.
+- We also would like to note that list experiments have many limitations. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.
