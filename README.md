@@ -39,7 +39,7 @@ In the rest of the document, I state how I have **wrangled**, **analyzed**, and 
 
 - There is nothing particular here. I dropped irrelevant columns from the survey data and changed key variable names to make them more intelligible.
 
-### Data analysis and visualization [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/02_data_analysis.Rmd)]
+### Data analysis [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/02_data_analysis.Rmd)]
 
 - Average treatment effect (ATE): As alluded, I used difference-in-means as an estimator of the average treatment effect. As can be seen below, using `dplyr` is quite handy in dealing with multiple treatment groups and treatment conditions. I calculated 95% confidence intervals using two-paired t-tests.
 
@@ -80,6 +80,8 @@ diff_means_test <- function(data, treat, direct, indirect) {
 
 }
 ```
+
+### Data visualization [[Outputs](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/)]
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/ate_results_plot.png)
 Figure 1. Estimated Average Treatment Effects
