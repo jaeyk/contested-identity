@@ -33,9 +33,7 @@ One problem with that approach is the non-representatives in the sample. The onl
 
 ## Workflow
 
-In this article, I focus on the rest of the research process: **data wrangling, analysis, and visualization.**
-
-### Matched random sampling
+In the rest of the document, I document how I have **wrangled**, **analyzed**, and **visualized** data. I shared the R code I used in each step.
 
 ### Data wrangling [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/01_data_wrangling.Rmd)]
 
@@ -81,4 +79,7 @@ Figure 1. Estimated Average Treatment Effect
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
 Figure 2. Estimated Conditional Average Treatment Effect with or without Bootstrapped Confidence Intervals
 
-## Conclusion
+## Conclusion remarks
+
+- We have found something interesting about the relationship between party ID and responses. However, as I did not use party ID as a blocking variable, this relationship is an association.
+- List experiments also have many problems. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.
