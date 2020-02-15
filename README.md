@@ -4,21 +4,21 @@
 
 ## Motivation
 
-In this project, [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) and I have tried to identify to what extent South Korean citizens hold biased attitude towards North Korean refugees. However, measuring sensitive attitudes in a survey is difficult because people tend to underreport their socially unpopular opinions, an effect also known as the social desirability bias. We overcame this problem by using a survey questionnaire technique called list experiment. In a list experiment, rather than bluntly asking respondents if they think North Koreans are less intelligent or if they waste tax dollars, respondents instead are given a list of statements and simply asked how many items they agreed with.
+In this project, [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) and I have tried to understand to what extent South Korean citizens hold biased attitude towards North Korean refugees. However, measuring sensitive attitudes in a survey is difficult because people tend to underreport their socially unpopular opinions, an effect also known as the [social desirability bias](https://en.wikipedia.org/wiki/Social_desirability_bias). We overcame this problem by using a survey questionnaire technique called [list experiment](https://dimewiki.worldbank.org/wiki/List_Experiments). In a list experiment, rather than bluntly asking respondents what they think about North Korean refugees, respondents instead are given a list of items which include a sensitive statement about North Korean refugees and simply asked how many items they agreed with.
 
 ## Research design
 
 ### Random assignment
-The experimental manipulation is in the statements that are read. In our version of the list experiment, respondents randomly assigned to the "control" condition receive three "naive" statement, that is three statements which are chosen for their irrelevance to the statement of interest; respondents randomly assigned to the "treatment" condition are read the same three naive statements and the statement of interest.  Since the researcher will not know which specific items the respondent agrees with, the respondent knows that their privacy is protected.
+The experimental manipulation is in the statements that are read. We divided survey participants into control and treatment groups. The control group was exposed to a list of naive statements (e.g., about the weather or sports). The treatment groups were exposed to an identical list plus one sensitive statement that accounts for an ethnic bias. Subsequently, we asked them to report how many statements they supported. Since the researcher will not know which specific items the respondent agrees with, the respondent knows that their privacy is protected.
 
 ### Blocked random assignment
-We assumed that political ideology is a covariate because the Korean political ideology has been known for its strong ties to the political attitude towards North Korea. We hypothesized that this relationship could also be demonstrated in the South Korean attitude towards North Korean refugees. For that reason, we did random assignment blocking on political ideology.
+We assumed that political ideology is a covariate because the Korean political ideology has been known for its strong ties to the political attitude towards North Korea. We hypothesized that this relationship could also be demonstrated in the way in which South Koreans view North Korean refugees. For that reason, we did random assignment blocking on political ideology.
 
 ### Random ordering
 The order of the two experiments is rotated so that we can circumvent the possible contamination effects of question order.
 
 ### Direct and indirect bias mesures
-In addition, we measured both direct (stereotype) and indirect bias (more policy-driven) to analyze the main characteristic of the bias.
+In addition, we distinguished direct (stereotype) and indirect bias (more policy-driven) and measured both of them. 
 
 ## Data collection: Mobile Survey using Matched Random Sampling
 
