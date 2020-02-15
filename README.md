@@ -89,7 +89,7 @@ Figure 1 shows estimated average treatment effects. We only find evidence for in
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
 Figure 2. Estimated Conditional Average Treatment Effects with or without Bootstrapped Confidence Intervals
 
-Figure 2 compares estimated conditional average treatment effects with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exits with respect to South Korean citizens' attitudes towards North Korean refugees.
+Figure 2 compares estimated conditional average treatment effects with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exits with respect to South Korean citizens' attitudes towards North Korean refugees. Bootstrapped confidence intervals made very marginal differences (they were slightly narrower than the non-bootstrapped confidence intervals). 
 
 ## Conclusion remarks
 
