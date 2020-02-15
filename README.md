@@ -71,7 +71,7 @@ diff_means_test <- function(data, treat, direct, indirect) {
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/ate_results_plot.png)
 Figure 1. Estimated Average Treatment Effect
 
-![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.pngg)
+![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
 Figure 2. Estimated Conditional Average Treatment Effect with or without Bootstrapped Confidence Intervals
 
 ## Conclusion
