@@ -31,9 +31,10 @@ pacman::p_load(
         ggpubr, # for arranging ggplots   
         ggthemes, # for fancy ggplot themes
         estimatr, # for fast estimation for design-based inference
-        list # stat methods for the item count technique and list experiment
+        list, # stat methods for the item count technique and list experiment
+        MKinfer, # for inferential statistics
+        nonpar # for nonparametric inference
 )
-
 ```
 
 ## 1. Importing data
@@ -47,14 +48,14 @@ df <- read.csv("/home/jae/analyzing-list-experiments/processed_data/processed_su
   
 ## 2. Average treatment effect (ATE)
 
-- By random assignment, difference-in-means is an unbiasted estimator of the average treatment effect.
+- By random assignment, difference-in-means is an unbiased estimator of the average treatment effect.
 - Still, there's a concern about sampling variability. I address that by conducting t-tests. Here, the null hypothesis the average treatment effect is 0.
 
 ### 2.1. Creating a function 
 
 ```{r}
 
-diff_means_test <- function(data, treat, direct, indirect) {
+diff_means_test <- function(data) {
   
   diff_summary <- data %>%
 
@@ -69,10 +70,10 @@ diff_means_test <- function(data, treat, direct, indirect) {
         diff_t4 = mean(.[treat == 5], na.rm = T) - mean(.[treat == 1], na.rm = T),
 
         # Calculating confidence intervals
-        conf_t1 = ((t.test(.[treat == 2], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t2 = ((t.test(.[treat == 3], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t3 = ((t.test(.[treat == 4], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t4 = ((t.test(.[treat == 5], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2
+        conf_t1 = (t.test(.[treat == 2], .[treat == 1])$conf.int[2] - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t2 = (t.test(.[treat == 3], .[treat == 1])$conf.int[2] - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t3 = (t.test(.[treat == 4], .[treat == 1])$conf.int[2] - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t4 = (t.test(.[treat == 5], .[treat == 1])$conf.int[2] - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2
       ),
       direct, indirect
     )
@@ -93,7 +94,7 @@ diff_means_test <- function(data, treat, direct, indirect) {
 ```{r}
 
 # Save test results
-ate.results <- diff_means_test(df, treat, direct, indirect) 
+ate.results <- diff_means_test(df) 
 
 # Recode values 
 ate.results$treat <- ate.results$treat %>%
@@ -146,8 +147,70 @@ cate.results
 
 ```
 
+## 4. Bootstrapping  
 
-## 4. Visualizing results 
+### 4.1. Using boot.t.test
+
+```{r}
+boot_dmt <- function(data) {
+  
+  diff_summary <- data %>%
+
+    # Summarize 
+    summarise_each(
+      funs(
+        
+        # Different in means 
+        diff_t1 = mean(.[treat == 2], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t2 = mean(.[treat == 3], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t3 = mean(.[treat == 4], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t4 = mean(.[treat == 5], na.rm = T) - mean(.[treat == 1], na.rm = T),
+
+        # Calculating confidence intervals
+        conf_t1 = (MKinfer::boot.t.test(.[treat == 2], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
+        conf_t2 = (MKinfer::boot.t.test(.[treat == 3], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
+        conf_t3 = (MKinfer::boot.t.test(.[treat == 4], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
+        conf_t4 = (MKinfer::boot.t.test(.[treat == 5], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2
+      ),
+      direct, indirect
+    )
+  
+  diff_summary %>%
+    gather(stat, val) %>% # stat = variables, val = values 
+    separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values  
+    spread(stat, val) %>% # reorder columns
+    mutate(var = replace(var, var == "direct", "Direct bias")) %>% # rename variables 
+    mutate(var = replace(var, var == "indirect", "Indirect bias")) 
+
+}
+
+
+```
+
+### 4.2. Recalculating CIs for CATE
+
+```{r}
+
+boot.cate.results <- bind_rows(
+mutate(boot_dmt(conservatives), subgroup = "Conservatives"),
+mutate(boot_dmt(moderates), subgroup = "Moderates"),
+mutate(boot_dmt(liberals), subgroup = "Liberals"),
+mutate(boot_dmt(undecided), subgroup = "Undecided")
+)
+
+# Recode values 
+boot.cate.results$treat <- boot.cate.results$treat %>%
+  recode(t1 = "Low-income S. Koreans",
+         t2 = "North Korean refugees",
+         t3 = "Korean Chinese migrants",
+         t4 = "Indonesian migrants")
+
+# Tidy model ouutcomes 
+boot.cate.results
+
+```
+
+## 5. Visualizing results 
 
 ```{r}
 
@@ -158,15 +221,15 @@ ate.results %>%
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() + 
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  labs(title = "List Experiment Results",
-  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
+  labs(title = "Treatment effects",
+  subtitle = " Direct bias: X group is stupid. \n Indirect bias: X group doesn't deserve support.",
   caption = "Source: Original mobile survey (N = 1464)",
   x = "Treatment status", y = "Estimated Average Treatment Effect",
   col = "Bias type") 
 
 ggsave("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png", width = 10)
 
-cate.results %>%
+no_boot_plot <- cate.results %>%
   ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
   theme_base() +
@@ -174,12 +237,30 @@ cate.results %>%
   coord_flip() +
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
   facet_wrap(~treat) +
-  labs(title = "List Experiment Results",
+  labs(title = "Heterogeneous treatment effects",
   subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
   caption = "Source: Original mobile survey (N = 1464)",
   x = "Conditions", y = "Conditional Estimated Average Treatment Effect",
-  col = "Bias type")
+  col = "Bias type") +
+  ylim(c(-0.4, 1.2))
 
-ggsave("/home/jae/analyzing-list-experiments/outputs/cate_results_plot.png", width = 10)
+boot_plot <- boot.cate.results %>%
+  ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
+  geom_pointrange() +
+  theme_base() +
+  geom_hline(yintercept = c(0), linetype = "dotted") +
+  coord_flip() +
+  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
+  facet_wrap(~treat) +
+  labs(title = "Heterogeneous treatment effects (with Bootstrapped CIs)",
+  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
+  caption = "Source: Original mobile survey (N = 1464)",
+  x = "Conditions", y = "Conditional Estimated Average Treatment Effect",
+  col = "Bias type") +
+  ylim(c(-0.4, 1.2))
 
+ggarrange(no_boot_plot, boot_plot, common.legend = TRUE,
+          ncol = 1, nrow = 2)
+
+ggsave("/home/jae/analyzing-list-experiments/outputs/cate_comparison_plot.png", width = 10, height = 10)
 ```
