@@ -1,0 +1,185 @@
+  ---
+title: "Data analysis"
+author: "Jae Yeon Kim"
+output:
+html_document: 
+  toc: true
+  theme: united
+---
+
+
+## 0. Setup 
+
+I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
+                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
+```
+
+```{r}
+
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        ggpubr, # for arranging ggplots   
+        ggthemes, # for fancy ggplot themes
+        estimatr, # for fast estimation for design-based inference
+        list # stat methods for the item count technique and list experiment
+)
+
+```
+
+## 1. Importing data
+
+```{r}
+
+# The processed data 
+df <- read.csv("/home/jae/analyzing-list-experiments/processed_data/processed_survey.csv")
+
+```
+  
+## 2. Average treatment effect (ATE)
+
+- By random assignment, difference-in-means is an unbiasted estimator of the average treatment effect.
+- Still, there's a concern about sampling variability. I address that by conducting t-tests. Here, the null hypothesis the average treatment effect is 0.
+
+### 2.1. Creating a function 
+
+```{r}
+
+diff_means_test <- function(data, treat, direct, indirect) {
+  
+  diff_summary <- data %>%
+
+    # Summarize 
+    summarise_each(
+      funs(
+        
+        # Different in means 
+        diff_t1 = mean(.[treat == 2], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t2 = mean(.[treat == 3], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t3 = mean(.[treat == 4], na.rm = T) - mean(.[treat == 1], na.rm = T),
+        diff_t4 = mean(.[treat == 5], na.rm = T) - mean(.[treat == 1], na.rm = T),
+
+        # Calculating confidence intervals
+        conf_t1 = ((t.test(.[treat == 2], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t2 = ((t.test(.[treat == 3], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t3 = ((t.test(.[treat == 4], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+        conf_t4 = ((t.test(.[treat == 5], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2
+      ),
+      direct, indirect
+    )
+  
+  diff_summary %>%
+    gather(stat, val) %>% # stat = variables, val = values 
+    separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values  
+    spread(stat, val) %>% # reorder columns
+    mutate(var = replace(var, var == "direct", "Direct bias")) %>% # rename variables 
+    mutate(var = replace(var, var == "indirect", "Indirect bias")) 
+
+}
+
+```
+
+### 2.2. ATE outcomes
+
+```{r}
+
+# Save test results
+ate.results <- diff_means_test(df, treat, direct, indirect) 
+
+# Recode values 
+ate.results$treat <- ate.results$treat %>%
+  recode(t1 = "Low-income S. Koreans",
+         t2 = "North Korean refugees",
+         t3 = "Korean Chinese migrants",
+         t4 = "Indonesian migrants")
+
+# Tidy model ouutcomes 
+ate.results
+
+```
+
+## 3. Conditional ATE
+
+### 3.1. Subsetting
+
+```{r}
+
+conservatives <- df %>% filter(ideology <= 2)
+
+moderates <- df %>% filter(ideology == 3)
+
+liberals <- df %>% filter(ideology == 4 | ideology == 5)
+
+undecided <- df %>% filter(ideology == 6)
+
+```
+
+### 3.2. Conditional ATE outcomes
+
+```{r}
+
+cate.results <- bind_rows(
+mutate(diff_means_test(conservatives), subgroup = "Conservatives"),
+mutate(diff_means_test(moderates), subgroup = "Moderates"),
+mutate(diff_means_test(liberals), subgroup = "Liberals"),
+mutate(diff_means_test(undecided), subgroup = "Undecided")
+)
+
+# Recode values 
+cate.results$treat <- cate.results$treat %>%
+  recode(t1 = "Low-income S. Koreans",
+         t2 = "North Korean refugees",
+         t3 = "Korean Chinese migrants",
+         t4 = "Indonesian migrants")
+
+# Tidy model ouutcomes 
+cate.results
+
+```
+
+
+## 4. Visualizing results 
+
+```{r}
+
+ate.results %>%
+  ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
+  geom_pointrange() +
+  theme_base() +
+  geom_hline(yintercept = c(0), linetype = "dotted") +
+  coord_flip() + 
+  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
+  labs(title = "List Experiment Results",
+  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
+  caption = "Source: Original mobile survey (N = 1464)",
+  x = "Treatment status", y = "Estimated Average Treatment Effect",
+  col = "Bias type") 
+
+ggsave("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png", width = 10)
+
+cate.results %>%
+  ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
+  geom_pointrange() +
+  theme_base() +
+  geom_hline(yintercept = c(0), linetype = "dotted") +
+  coord_flip() +
+  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
+  facet_wrap(~treat) +
+  labs(title = "List Experiment Results",
+  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
+  caption = "Source: Original mobile survey (N = 1464)",
+  x = "Conditions", y = "Conditional Estimated Average Treatment Effect",
+  col = "Bias type")
+
+ggsave("/home/jae/analyzing-list-experiments/outputs/cate_results_plot.png", width = 10)
+
+```

@@ -1,0 +1,111 @@
+  ---
+title: "Data wrangling"
+author: "Jae Yeon Kim"
+output:
+html_document: 
+  toc: true
+  theme: united
+---
+
+## 0. Setup 
+
+I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
+                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
+```
+
+```{r}
+
+# Clean up the environment
+
+rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        ggpubr, # for arranging ggplots   
+        ggthemes, # for fancy ggplot themes
+        estimatr, # for fast estimation for design-based inference
+        list # stat methods for the item count technique and list experiment
+)
+
+```
+
+```{r}
+
+# Clean up the environment
+
+# rm(list = ls())
+
+# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+        tidyverse, # for the tidyverse framework
+        ggpubr, # for arranging ggplots   
+        ggthemes, # for fancy ggplot themes
+        estimatr, # for fast estimation for design-based inference
+        list, # stat methods for the item count technique and list experiment
+        ri2 # randomization inference for randomized experiments
+)
+
+```
+
+- To reduce sampling bias, I first matched the online panel with the existing probability sample (matched random sampling).
+- Using this sampling frame, I contacted 2,303 people and 1,542 responded to the 1st survey (response rate: 67%).
+- I randomly divided these participants into four groups (one control plus three treatment groups) blocking on ideology.
+- I invited these 1,542 to the 2nd survey and 1,464 of them participated (response rate: 95%).
+
+## 1. Importing data
+
+```{r}
+
+# The entire dataset 
+survey <- read.csv("/home/jae/analyzing-list-experiments/raw_data/survey_result.csv")
+
+```
+
+## 2. Wrangling data 
+
+### 2.1. Subsetting 
+
+```{r}
+# Subset those participated the pre- and post-survey = complete case analysis and drop columns that we don't need 
+df <- survey %>%
+  filter(answered2 == 1) %>%
+  dplyr::select(-contains("ans")) %>%
+    dplyr::select(-starts_with("X")) %>%
+  dplyr::select(-(c("Q","time1","time2")))
+
+```
+
+### 2.2. Renaming and recoding 
+
+```{r}
+
+# Check dimensions 
+dim(df)
+
+# See the names of variables 
+names(df)
+
+# Rename variables 
+names(df)[which(names(df) == "pq5")] <- "partyID"
+names(df)[which(names(df) == "pq7")] <- "ideology"
+names(df)[which(names(df) == "z2")] <- "treat"
+names(df)[which(names(df) == "q1")] <- "direct"
+names(df)[which(names(df) == "q2")] <- "indirect"
+
+```
+
+## 4. Export the file 
+
+```{r}
+write.csv(df, file = "/home/jae/analyzing-list-experiments/processed_data/processed_survey.csv")
+
+```
+
