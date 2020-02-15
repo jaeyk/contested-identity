@@ -89,10 +89,10 @@ Figure 1 shows estimated average treatment effects. We only find evidence for in
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
 Figure 2. Estimated Conditional Average Treatment Effects with or without Bootstrapped Confidence Intervals
 
-Figure 2 compares estimated conditional average treatment effects with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exits with respect to South Korean citizens' attitudes towards North Korean refugees. Bootstrapped confidence intervals made very marginal differences (they were slightly narrower than the non-bootstrapped confidence intervals). 
+Figure 2 compares estimated conditional average treatment effects with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exits with respect to South Korean citizens' attitudes towards North Korean refugees. Bootstrapped confidence intervals made very marginal differences (they were slightly narrower than the non-bootstrapped confidence intervals).
 
 ## Conclusion remarks
 
 - In the additional analysis, we have found something interesting about how party ID interacts with responses. However, we are cautioned to make a strong claim about this pattern because we did not use party ID as a blocking variable. This relationship is an association.
-- Ideological moderates are not exactly positioned in the middle. They could be leaning towards either side of the ideological spectrum. If that were the case, replacing their responses with NAs and then imputing them using multiple imputation could be one way to investigate how ideology influences the South Korean citizen-North Korean refugee relationship in South Korea.
+- Ideological moderates are not exactly positioned in the middle. They could be leaning towards either side of the ideological spectrum. If that were the case, replacing their responses with NAs and then imputing them using multiple imputation could be a more precise way to investigate the causal effect of ideology on ethnic relations in South Korea.
 - We also would like to note that list experiments have many limitations. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.
