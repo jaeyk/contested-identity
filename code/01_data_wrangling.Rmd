@@ -65,8 +65,7 @@ pacman::p_load(
 ```{r}
 
 # The entire dataset 
-survey <- read.csv("/home/jae/analyzing-list-experiments/raw_data/survey_result.csv")
-
+survey <- read.csv("/home/jae/analyzing-list-experiments/processed_data/survey_result.csv")
 ```
 
 ## 2. Wrangling data 

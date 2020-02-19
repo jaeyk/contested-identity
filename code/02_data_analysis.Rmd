@@ -167,10 +167,10 @@ boot_dmt <- function(data) {
         diff_t4 = mean(.[treat == 5], na.rm = T) - mean(.[treat == 1], na.rm = T),
 
         # Calculating confidence intervals
-        conf_t1 = (MKinfer::boot.t.test(.[treat == 2], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
-        conf_t2 = (MKinfer::boot.t.test(.[treat == 3], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
-        conf_t3 = (MKinfer::boot.t.test(.[treat == 4], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2,
-        conf_t4 = (MKinfer::boot.t.test(.[treat == 5], .[treat == 1], R = 100)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 100)$boot.conf.int[1]) / 2
+        conf_t1 = (MKinfer::boot.t.test(.[treat == 2], .[treat == 1], R = 1000)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 1000)$boot.conf.int[1]) / 2,
+        conf_t2 = (MKinfer::boot.t.test(.[treat == 3], .[treat == 1], R = 1000)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 1000)$boot.conf.int[1]) / 2,
+        conf_t3 = (MKinfer::boot.t.test(.[treat == 4], .[treat == 1], R = 1000)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 1000)$boot.conf.int[1]) / 2,
+        conf_t4 = (MKinfer::boot.t.test(.[treat == 5], .[treat == 1], R = 1000)$boot.conf.int[2] - MKinfer::boot.t.test(.[treat == 1], .[treat == 1], R = 1000)$boot.conf.int[1]) / 2
       ),
       direct, indirect
     )
