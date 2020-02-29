@@ -31,10 +31,12 @@ pacman::p_load(
         ggpubr, # for arranging ggplots   
         ggthemes, # for fancy ggplot themes
         estimatr, # for fast estimation for design-based inference
-        list, # stat methods for the item count technique and list experiment
+        DACF, # for ceiling and or/floor data 
         MKinfer, # for inferential statistics
         nonpar # for nonparametric inference
 )
+
+theme_set(theme_base) # set theme to base
 ```
 
 ## 1. Importing data
@@ -46,12 +48,25 @@ df <- read.csv("/home/jae/analyzing-list-experiments/processed_data/processed_su
 
 ```
   
-## 2. Average treatment effect (ATE)
+## 2. Testing ceiling and/or floor effect 
+
+```{r}
+
+df %>%
+  gather(measures, responses, c(direct, indirect)) %>%
+  ggplot(aes(x = responses)) +
+    geom_density() +
+    facet_grid(measures~treat) +    
+    labs(x = "Responses", y = "Density")
+
+```
+
+## 3. Average treatment effect (ATE)
 
 - By random assignment, difference-in-means is an unbiased estimator of the average treatment effect.
 - Still, there's a concern about sampling variability. I address that by conducting t-tests. Here, the null hypothesis the average treatment effect is 0.
 
-### 2.1. Creating a function 
+### 3.1. Creating a function 
 
 ```{r}
 
@@ -89,7 +104,7 @@ diff_means_test <- function(data) {
 
 ```
 
-### 2.2. ATE outcomes
+### 3.2. ATE outcomes
 
 ```{r}
 
@@ -108,9 +123,9 @@ ate.results
 
 ```
 
-## 3. Conditional ATE
+## 4. Conditional ATE
 
-### 3.1. Subsetting
+### 4.1. Subsetting
 
 ```{r}
 
@@ -124,7 +139,7 @@ undecided <- df %>% filter(ideology == 6)
 
 ```
 
-### 3.2. Conditional ATE outcomes
+### 4.2. Conditional ATE outcomes
 
 ```{r}
 
@@ -147,9 +162,9 @@ cate.results
 
 ```
 
-## 4. Bootstrapping  
+## 5. Bootstrapping  
 
-### 4.1. Using boot.t.test
+### 5.1. Using boot.t.test
 
 ```{r}
 boot_dmt <- function(data) {
@@ -187,7 +202,7 @@ boot_dmt <- function(data) {
 
 ```
 
-### 4.2. Recalculating CIs for CATE
+### 5.2. Recalculating CIs for CATE
 
 ```{r}
 
@@ -210,14 +225,14 @@ boot.cate.results
 
 ```
 
-## 5. Visualizing results 
+## 6. Visualizing results 
 
 ```{r}
 
 ate.results %>%
   ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-  theme_base() +
+   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() + 
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
@@ -232,7 +247,7 @@ ggsave("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png", widt
 no_boot_plot <- cate.results %>%
   ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-  theme_base() +
+   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
@@ -247,7 +262,7 @@ no_boot_plot <- cate.results %>%
 boot_plot <- boot.cate.results %>%
   ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-  theme_base() +
+   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
