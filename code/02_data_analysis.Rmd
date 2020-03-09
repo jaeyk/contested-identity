@@ -36,7 +36,10 @@ pacman::p_load(
         nonpar # for nonparametric inference
 )
 
-theme_set(theme_base) # set theme to base
+
+source("/home/jae/analyzing-list-experiments/functions/theme_publications.r")
+
+theme_set(theme_Publication(14))
 ```
 
 ## 1. Importing data
@@ -232,7 +235,6 @@ boot.cate.results
 ate.results %>%
   ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() + 
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
@@ -247,7 +249,6 @@ ggsave("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png", widt
 no_boot_plot <- cate.results %>%
   ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
@@ -262,7 +263,6 @@ no_boot_plot <- cate.results %>%
 boot_plot <- boot.cate.results %>%
   ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
   geom_pointrange() +
-   +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
   scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
