@@ -47,7 +47,7 @@ In the rest of the document, I state how I have **wrangled**, **analyzed**, and 
 
 - Bootstrapping confidence intervals: CATE requires subgroup analysis. Subgroup analysis reduces sample size and increases type II error (false negative). Particularly concerning is t-tests that are vulnerable to outliers. When we have a few observations, the effects of outliers could get stronger. To address this concern, I also calculated bootstrapped 95% confidence intervals. Bootstrapping is a non-parametric method, and it helps get more precise estimates of confidence intervals.
 
-```{R}
+```r
 diff_means_test <- function(data, treat, direct, indirect) {
 
   diff_summary <- data %>%
@@ -73,7 +73,7 @@ diff_means_test <- function(data, treat, direct, indirect) {
 
   diff_summary %>%
     gather(stat, val) %>% # stat = variables, val = values
-    separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values  
+    separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values
     spread(stat, val) %>% # reorder columns
     mutate(var = replace(var, var == "direct", "Direct bias")) %>% # rename variables
     mutate(var = replace(var, var == "indirect", "Indirect bias"))
