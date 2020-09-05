@@ -91,6 +91,42 @@ names(df)[which(names(df) == "z2")] <- "treat"
 names(df)[which(names(df) == "q1")] <- "direct"
 names(df)[which(names(df) == "q2")] <- "indirect"
 
+df$party[df$party %in% 1] <- "Conservative Partisans"
+df$party[df$party %in% 2] <- "Conservative Partisans"
+df$party[df$party %in% 3] <- "Liberal Partisans"
+df$party[df$party %in% 4] <- "Conservative Partisans"
+df$party[df$party %in% 5] <- "Liberal Partisans"
+df$party[df$party %in% 6] <- "Others"
+df$party[df$party %in% 7] <- "No Party"
+df$party[df$party %in% 8] <- "Don't know"
+
+df$party_f <- factor(df$party,
+  levels = c("Liberal Partisans", "Conservative Partisans", "Others", "No Party", "Don't know")
+)
+
+df$party_lib <- ifelse(df$party_f == "Liberal Partisans", 1 , 0) 
+df$party_con <- ifelse(df$party_f == "Conservative Partisans", 1 , 0)
+
+## I specified partian responses into characters.
+df$ideology[df$ideology %in% 1] <- "Lib"
+df$ideology[df$ideology %in% 2] <- "Lib"
+df$ideology[df$ideology %in% 3] <- "Moderate"
+df$ideology[df$ideology %in% 4] <- "Con"
+df$ideology[df$ideology %in% 5] <- "Con"
+df$ideology[df$ideology %in% 6] <- "Don't know"
+
+df$ideo_f <- factor(df$ideology,
+  levels = c("Lib", "Moderate", "Con", "Don't know")
+)
+
+df$ideo_con <- ifelse(df$ideo_f == "Con", 1, 0)
+df$ideo_lib <- ifelse(df$ideo_f == "Lib", 1, 0)
+
+df$college <- ifelse(df$edu1 == 4 | df$edu1 == 5, 1, 0)
+
+df$korean_war <- ifelse(df$age >= 65, 1, 0)
+
+df$men <- ifelse(df$gender == 1, 1, 0)
 ```
 
 # Export the file 

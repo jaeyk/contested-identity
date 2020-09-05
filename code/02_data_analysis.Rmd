@@ -16,8 +16,10 @@ output:
 pacman::p_load(
         tidyverse, # for the tidyverse framework
         ggpubr, # for arranging ggplots   
+        patchwork, # for arranging ggplots
         ggthemes, # for fancy ggplot themes
         estimatr, # for fast estimation for design-based inference
+        list, # statistical analysis of list experiments
         DACF, # for ceiling and or/floor data 
         MKinfer, # for inferential statistics
         nonpar, # for nonparametric inference
@@ -53,24 +55,87 @@ df <- read.csv(make_here("/home/jae/analyzing-list-experiments/processed_data/pr
 
 ```
   
-# Testing ceiling and/or floor effect 
+# Testing design effect 
+
+- Tested design effect using Bonferroni-corrected p-value. If this value is below alpha, you reject the null hypothesis of no design effect. If it is above alpha, you fail to reject the null.
+
+- Direct bias: Above alpha. No design effect.
+- Indirect bias: Above alpha. No design effect.
 
 ```{r}
 
-df %>%
-  gather(measures, responses, c(direct, indirect)) %>%
-  ggplot(aes(x = responses)) +
-    geom_density() +
-    facet_grid(measures~treat) +    
-    labs(x = "Responses", y = "Density")
+test <- subset(df, treat == 1 | treat == 3)
+
+test$treat_f <- ifelse(test$treat == 3, 1, 0)
+
+data(affirm)
+data(race)
+
+test.value.affirm <- ict.test(test$indirect, test$treat_f, J = 3, gms = TRUE)
+
+print(test.value.affirm)
 
 ```
+# Multivariate analysis 
 
+```{r}
+
+ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                 J = 3, 
+         data = test, 
+         method = "ml")
+
+ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                 J = 3, 
+         data = test, 
+         method = "ml")
+
+ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                 J = 3, 
+         data = test, 
+         method = "ml")
+
+ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                 J = 3, 
+         data = test, 
+         method = "ml") 
+
+qd1 <- analyze_multi_ate(ate.par.q1) %>%
+  plot_multi_ate() +
+  labs(title = "Partisanship", 
+       subtitle = "Direct bias")+
+  scale_x_discrete(labels = c("Liberal", "Income", "Male", "Age", "College", "Conservative"))
+
+
+qd2 <- analyze_multi_ate(ate.ideo.q1) %>%
+  plot_multi_ate() +
+  labs(title = "Ideology", 
+       subtitle = "Direct bias")+
+  scale_x_discrete(labels = c("Income", "Male", "Conservative", "Age", "Liberal", "College"))
+
+qid1 <- analyze_multi_ate(ate.par.q2) %>%
+  plot_multi_ate() +
+  labs(title = "Partisanship", 
+       subtitle = "Indirect bias") +
+  scale_x_discrete(labels = c("College", "Liberal", "Male", "Age", "Income", "Conservative"))
+
+qid2 <- analyze_multi_ate(ate.ideo.q2) %>%
+  plot_multi_ate() +
+  labs(title = "Ideology", 
+       subtitle = "Indirect bias")+
+  scale_x_discrete(labels = c("Liberal", "College", "Male", "Age", "Income", "Conservative"))
+
+qd1 + qd2 
+ggsave(here("outputs", "multi_direct.png"), width = 10)
+
+qid1 + qid2
+ggsave(here("outputs", "multi_indirect.png"), width =10)
+
+```
 # Average treatment effect (ATE)
 
 - By random assignment, difference-in-means is an unbiased estimator of the average treatment effect.
 - Still, there's a concern about sampling variability. I address that by conducting t-tests. Here, the null hypothesis the average treatment effect is 0.
-
 
 ## ATE outcomes
 
@@ -97,9 +162,9 @@ ate.results
 
 ```{r}
 
-conservatives <- df %>% filter(party_f == "Conservative Partisans")
+conservatives <- df %>% filter(ideo_con == 1)
 
-liberals <- df %>% filter(party_f == "Liberal Partisans")
+liberals <- df %>% filter(ideo_lib == 1)
 
 ```
 
