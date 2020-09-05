@@ -45,8 +45,6 @@ In the rest of the document, I state how I have **wrangled**, **analyzed**, and 
 
 - Conditional average treatment effect (CATE): Ideology was used as a blocking variable. Thus, ideology is unrelated to the assignment process. I subdivided the survey data according to the respondents' ideological position and calculated difference-in-means within each stratum. These differences-in-means are unbiased estimators of average treatment effects that are conditional on ideology.
 
-- Bootstrapping confidence intervals: CATE requires subgroup analysis. Subgroup analysis reduces sample size and increases type II error (false negative). Particularly concerning is t-tests that are vulnerable to outliers. When we have a few observations, the effects of outliers could get stronger. To address this concern, I also calculated bootstrapped 95% confidence intervals. Bootstrapping is a non-parametric method, and it helps get more precise estimates of confidence intervals.
-
 ```r
 diff_means_test <- function(data, treat, direct, indirect) {
 
@@ -89,12 +87,11 @@ Figure 1. Estimated Average Treatment Effects
 Figure 1 shows the effects of estimated average treatment. We only find evidence of indirect bias toward North Korean refugees but not direct bias. Another noticeable fact is that the extent to which South Korean citizens hold a bias toward North Korean refugees is similar to their attitude toward Indonesian migrant workers.
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
-Figure 2. Estimated Conditional Average Treatment Effects with or without Bootstrapped Confidence Intervals
+Figure 2. Estimated Conditional Average Treatment Effects
 
-Figure 2 compares the estimated effects of conditional average treatment with or without bootstrapped confidence intervals. Interestingly, no strong partisan difference exists concerning South Korean citizens' attitudes towards North Korean refugees. Bootstrapped confidence intervals made very marginal differences (they were slightly narrower than the non-bootstrapped confidence intervals).
+Figure 2 compares the estimated effects of conditional average treatment. Interestingly, no strong partisan difference exists concerning South Korean citizens' attitudes towards North Korean refugees.
 
 ## Conclusion remarks
 
 - In the additional analysis, we have found something interesting about how party ID interacts with responses. However, we are cautioned to make a strong claim about this pattern because we did not use party ID as a blocking variable. This relationship is an association.
-- Ideological moderates are not exactly positioned in the middle. They could be leaning towards either side of the ideological spectrum. If that is the case, replacing their responses with NAs and then imputing them using multiple imputations could be a more precise way to investigate the causal effect of ideology on ethnic relations in South Korea.
 - We would also note that list experiments have many limitations. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.

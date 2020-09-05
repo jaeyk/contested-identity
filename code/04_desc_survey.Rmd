@@ -46,290 +46,89 @@ theme_set(theme_pubr())
 
 ```{r}
 
-# KGSS
-kgss2003 <- read_spss(here("raw_data", "kor_data_20030006.sav"))
-kgss2004 <- read_spss(here("raw_data", "kor_data_20040001.sav"))
-kgss2005 <- read_spss(here("raw_data", "kor_data_20050001.sav"))
-kgss2006 <- read_spss(here("raw_data", "kor_data_20060003_201702m.sav"))
-kgss2007 <- read_spss(here("raw_data", "kor_data_20070026.sav"))
-kgss2008 <- read_spss(here("raw_data", "kor_data_20080009.sav"))
-kgss2009 <- read_spss(here("raw_data", "kor_data_20090037.sav"))
-kgss2010 <- read_spss(here("raw_data", "kor_data_20100074.sav"))
-kgss2011 <- read_spss(here("raw_data", "kor_data_20110098.sav"))
-kgss2012 <- read_spss(here("raw_data", "kor_data_20120156.sav"))
-kgss2013 <- read_spss(here("raw_data", "kor_data_20130100.sav"))
-kgss2014 <- read_spss(here("raw_data", "kor_data_20140100.sav"))
+# The processed data 
+df <- read.csv(make_here("/home/jae/analyzing-list-experiments/processed_data/processed_survey.csv"))
 
-# NK stat
-NK_stat <- read_csv(here("raw_data", "NK_stat.csv"))
-
-# In person 
-nkinperson <- read_csv(here("raw_data", "NK_inperson.csv"))
 ```
 
-# Wrangle 
 
 ```{r}
+colnames(df)[colnames(df) == "pq5"] <- "party"
 
-# Cbind
-NK_accept <- as.data.frame(cbind(kgss2011$NKACCEPT, kgss2012$NKACCEPT, kgss2013$NKACCEPT, kgss2014$NKACCEPT))
+## I specified partian responses into characters.
+df$party[df$party %in% 1] <- "Conservative Partisans"
+df$party[df$party %in% 2] <- "Conservative Partisans"
+df$party[df$party %in% 3] <- "Liberal Partisans"
+df$party[df$party %in% 4] <- "Conservative Partisans"
+df$party[df$party %in% 5] <- "Liberal Partisans"
+df$party[df$party %in% 6] <- "Others"
+df$party[df$party %in% 7] <- "No Party"
+df$party[df$party %in% 8] <- "Don't know"
 
-NK_close <- as.data.frame(cbind(kgss2011$NKCLOSE, kgss2012$NKCLOSE, kgss2013$NKCLOSE, kgss2014$NKCLOSE))
-
-# NA 
-NK_accept[NK_accept >= 4] <- NA
-
-NK_close[NK_accept >= 5] <- NA
-
-# Mean and CIs
-NK_accept_ci <- map_df(NK_accept, gmodels::ci, na.rm=T) %>%
-        mutate(year = c("2011","2012","2013","2014"),
-               response = "Accept")
-
-NK_close_ci <- map_df(NK_close, gmodels::ci, na.rm=T) %>%
-        mutate(year = c("2011","2012","2013","2014"), 
-               response = "Close")
-
-# Combine 
-NK_survey_trend <- bind_rows(NK_accept_ci, NK_close_ci)
-
-aplot <- NK_survey_trend %>%
-        filter(response == "Accept") %>%
-        ggplot(aes(x = year, y = Estimate, ymax = `CI upper`, ymin = `CI lower`)) +
-        geom_col() +
-        geom_errorbar() +
-        labs(y = "Average response", 
-             x = "Year",
-             title = "Acceptance") +
-        ylim(c(0,3))
-
-cplot <- NK_survey_trend %>%
-        filter(response != "Accept") %>%
-        ggplot(aes(x = year, y = Estimate, ymax = `CI upper`, ymin = `CI lower`)) +
-     geom_col() +
-        geom_errorbar() +
-        labs(y = "Average response", 
-             x = "Year",
-             title = "Feeling close") +
-        ylim(c(0,4))
-
-aplot + cplot 
-ggsave(here("outputs", "NK_survey_trend.png"))
-```
-
-```{r}
-
-# Party ID
-bf_2003 <- select_nk_party(kgss2003)
-bf_2004 <- select_nk_party(kgss2004)
-bf_2005 <- select_nk_party(kgss2005)
-bf_2006 <- select_nk_party(kgss2006)
-bf_2007 <- select_nk_party(kgss2007)
-bf_2008 <- dplyr::select(kgss2008, NORTHWHO, PARTYID)
-bf_2009 <- dplyr::select(kgss2009, NORTHWHO, PARTYID)
-bf_2014 <- dplyr::select(kgss2014, NORTHWHO, PRTYID14)
-
-colnames(bf_2008) <-c("northwho", "partyid")
-colnames(bf_2009) <-c("northwho", "partyid")
-colnames(bf_2014) <-c("northwho", "partyid")
-
-bf_2003$northwho[bf_2003$northwho >= 5] <- NA
-bf_2004$northwho[bf_2004$northwho >= 5] <- NA
-bf_2005$northwho[bf_2005$northwho >= 5] <- NA
-bf_2006$northwho[bf_2006$northwho >= 5] <- NA
-bf_2007$northwho[bf_2007$northwho >= 5] <- NA
-bf_2008$northwho[bf_2008$northwho >= 5] <- NA
-bf_2009$northwho[bf_2009$northwho >= 5] <- NA
-bf_2014$northwho[bf_2014$northwho >= 5] <- NA
-
-bf_2003$partyid[bf_2003$partyid >= 7] <- NA
-bf_2004$partyid[bf_2004$partyid >= 6] <- NA
-bf_2005$partyid[bf_2005$partyid >= 6] <- NA
-bf_2006$partyid[bf_2006$partyid >= 6] <- NA
-bf_2007$partyid[bf_2007$partyid >= 6] <- NA
-bf_2008$partyid[bf_2008$partyid >= 66] <- NA
-bf_2009$partyid[bf_2009$partyid >= 66] <- NA
-bf_2014$partyid[bf_2014$partyid >= 66] <- NA
-
-bf_2003$party_f <- ifelse(bf_2003$partyid == 1 | bf_2003$partyid == 2, 1, 0)
-bf_2004$party_f <- ifelse(bf_2004$partyid == 1 | bf_2004$partyid == 2, 1, 0)
-bf_2005$party_f <- ifelse(bf_2005$partyid == 1 | bf_2005$partyid == 2, 1, 0)
-bf_2006$party_f <- ifelse(bf_2006$partyid == 1 | bf_2006$partyid == 2, 1, 0)
-bf_2007$party_f <- ifelse(bf_2007$partyid == 1 | bf_2007$partyid == 5, 1, 0)
-bf_2008$party_f <- ifelse(bf_2008$partyid == 1 | bf_2008$partyid == 2 | bf_2008$partyid == 5, 1, 0)
-bf_2009$party_f <- ifelse(bf_2009$partyid == 1 | bf_2009$partyid == 2 | bf_2009$partyid == 4, 1, 0)
-bf_2014$party_f <- ifelse(bf_2014$partyid == 1, 1, 0)
-
-bf_trend<- bind_rows(
-  mutate(bf_2003, year="2003"),
-  mutate(bf_2004, year="2004"),
-  mutate(bf_2005, year="2005"),
-  mutate(bf_2006, year="2006"),
-  mutate(bf_2007, year="2007"),
-  mutate(bf_2008, year="2008"),
-  mutate(bf_2009, year="2009"),
-  mutate(bf_2014, year="2014")
+df$party_f <- factor(df$party,
+  levels = c("Liberal Partisans", "Conservative Partisans", "Others", "No Party", "Don't know")
 )
 
-bf_trend %>%
-        group_by(party_f, year) %>%
-        summarise(mean = gmodels::ci(northwho, na.rm = TRUE)[1],
-                  upper = gmodels::ci(northwho, na.rm = TRUE)[2],
-                  lower = gmodels::ci(northwho, na.rm = TRUE)[3]) %>%
-        filter(!is.na(party_f)) %>%
-        ggplot(aes(x = year, y = mean, ymax = upper, ymin = lower, col = factor(party_f))) +
-        scale_color_hue("Partisanship", labels=c("Liberal","Conservative")) +
-        geom_pointrange() +
-        labs(y = "Is North Korea a friend or an enemy?",
-             x = "Year") +
-        ylim(c(1,4)) +
-        geom_hline(yintercept = c(2.5), linetype = "dashed")
 
-ggsave(here("outputs", "bf_trend.png"))
+table(df$pq6[df$party_f == "Lib Party"])
+table(df$pq6[df$party_f == "Con Party"])
+267 / (267 + 207)
+71 / (71 + 57)
+
+# what's pk?
+df$pk1 <- ifelse(df$pq8 == 1, 1, 0)
+df$pk2 <- ifelse(df$pq9 == 1, 1, 0)
+df$pk3 <- ifelse(df$pq10 == 3, 1, 0)
+
+df$pk <- (df$pk1 + df$pk2 + df$pk3)
 ```
 
+# Regression analysis
+
+## Select variables
 ```{r}
+df$external_motivation <- rowMeans(df[,c("q3","q4","q5")],na.rm = T) 
+df$internal_motivation <- rowMeans(df[,c("q7","q8")],na.rm = T) 
 
+df$lib_party <- ifelse(df$party_f == "Liberal Partisans", 1, 0)
+df$conserv_party <- ifelse(df$party_f == "Conservative Partisans", 1, 0)
 
-NK_stat$Total <- as.numeric(NK_stat$Total)
+df %>%
+  dplyr::select(q3, q4, q5) %>%
+  psych::pairs.panels()
 
-ggplot(NK_stat, aes(x=Year, y=cumsum(Total))) + 
-  geom_line() + 
-  geom_point() +
-  ylab("Cumulative number of admitted North Korean refugees") +
-
-ggplot(nkinperson, aes(x=Year, y=`In-person`/100)) + 
-    labs(y="Met a North Korean refugee in person?",
-    x = "Year") +
-    geom_col() +
-    scale_y_continuous(labels = scales::percent)
-
-ggsave(here("outputs", "nk_contrast.png"), height = 5)
+df %>%
+  dplyr::select(q6, q7, q8) %>%
+  psych::pairs.panels()
 
 ```
 
-
+## Building models
 ```{r}
+external_reg <- lm(data = df, external_motivation ~ lib_party + conserv_party + income + as.factor(gender) + age  + as.factor(reg7))
 
-# Turn the data into data frame
-kgss2010 <- data.frame(kgss2010)
+internal_reg <- lm(data = df, internal_motivation ~ lib_party + conserv_party + income + as.factor(gender) + age + + as.factor(reg7))
 
-# PARTY ID
-kgss2003$PARTYID <- replace_partyid(kgss2003$partyid)
-kgss2010$PARTYID <- replace_partyid(kgss2010$PARTYID)
+library(tidyverse)
+library(broom)
 
-# Replace values
-kgss2010_immigrant <- kgss2010 %>%
-  filter(!is.na(PARTYID)) %>%
-  gather(immigrant_attitude, value, FPOLICY1, IMMTXINC)
-
-kgss2010_immigrant$immigrant_attitude <- kgss2010_immigrant$immigrant_attitude %>%
-  replace_value("FPOLICY1", "Welfare benefits to immigrants") %>%
-  replace_value("IMMTXINC", "Pay more taxes to support immigrants")
-
-kgss2010_immigrant$value <- kgss2010_immigrant$value %>%
-  replace_value(8, NA) %>%
-  replace_value(1, 1) %>%
-  replace_value(2, 0.25) %>%
-  replace_value(3, 0) %>%
-  replace_value(4, -0.25) %>%
-  replace_value(5, -1)
-
-# Plot
-kgss2010_immigrant %>%
-  group_by(PARTYID, immigrant_attitude) %>%
-  ggplot(aes(y = value, x = PARTYID)) +
-    stat_summary(fun.y = mean, geom = "point", size = 2) +
-    stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge", fun.args = list(mult= 1.96)) +
-    theme_Publication() +
-    facet_wrap(~immigrant_attitude) +
-    labs(x = "Partisanship",
-         y = "Level of support")
-
-ggsave("/home/jae/invisible_minorities_KL/Output/immigrant_attitude.png", width = 8)
+motivation_reg <- bind_rows(mutate(tidy(external_reg, conf.int = TRUE), category = "External motivation"),
+          mutate(tidy(internal_reg, conf.int = TRUE), category = "Internal motivation"))
 ```
 
-
 ```{r}
+motivation_reg %>%
+  filter(term == "lib_party" | term == "conserv_party") %>%
+  mutate(term = replace(term, term == "lib_party", "Liberal partisans")) %>%
+  mutate(term =replace(term, term == "conserv_party", "Conservative partisans")) %>%
+  ggplot(aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
+  geom_pointrange() +
+  coord_flip() +
+  labs(y = "OLS estimate",
+       x ="")+
+  facet_wrap(~category) +
+  geom_hline(yintercept = c(0), linetype = "dotted")
 
-kgss2010_nk <- kgss2010 %>%
-  filter(!is.na(PARTYID)) %>%
-  rename(Citizens = CITZNNK) %>%
-  rename(Colleagues = COLLGNK) %>%
-  rename(Neighbors = NEIGHNK) %>%
-  rename(Friends = FRNDNK) %>%
-  rename(Spouse_of_Your_Children = SONLWNK) %>%
-  rename(Spouse = SPOUZNK) %>%
-  gather(nk_attitude, value, Citizens, Colleagues, Neighbors, Friends, Spouse_of_Your_Children, Spouse)
+ggsave(here("outputs", "motivations.png"))
 
-kgss2010_nk[kgss2010_nk == 8] <- NA
-kgss2010_nk[kgss2010_nk == 2] <- -1
-
-kgss2010_nk <- replace_party(kgss2010_nk)
-kgss2010_nk$nk_attitude <- gsub("_", " ", kgss2010_nk$nk_attitude)
-
-# Plot
-kgss2010_nk %>%              
-  filter(!is.na(party_f)) %>%
-  mutate(party_f = factor(party_f)) %>%
-  group_by(party_f, nk_attitude) %>%
-  mutate(nk_attitue = gsub("_", " ", nk_attitude)) %>%
-  summarise(mean = gmodels::ci(value, na.rm = TRUE)[1],
-            upper = gmodels::ci(value, na.rm = TRUE)[2],
-            lower = gmodels::ci(value, na.rm = TRUE)[3]) %>%
-  filter(!is.na(party_f)) %>%
-  ggplot(aes(x = party_f, y = mean, ymax = upper, ymin = lower)) +
-    scale_x_discrete("Partisanship", labels=c("Conservative","Liberal")) +
-    geom_pointrange() +
-    geom_hline(yintercept = 0, linetype = "dashed") +
-    facet_wrap(~nk_attitude, ncol = 2) +
-    labs(x = "Partisanship",
-         y = "Accepting North Korean Refugee as ... ") +
-    coord_flip()
-
-ggsave(here("outputs", "nk_attitude.png"))
-```
-
-
-```{r}
-
-# Turn the data into data frame
-kgss2010 <- data.frame(kgss2010)
-
-# PARTY ID
-kgss2003 <- replace_partyid(kgss2003)
-kgss2010 <- replace_party(kgss2010)
-
-# Replace values
-kgss2010_immigrant <- kgss2010 %>%
-  filter(!is.na(party_f)) %>%
-  gather(immigrant_attitude, value, FPOLICY1, IMMTXINC)
-
-kgss2010_immigrant$immigrant_attitude[kgss2010_immigrant$immigrant_attitude == "FPOLICY1"] <- "Welfare benefits to immigrants"
-
-kgss2010_immigrant$immigrant_attitude[kgss2010_immigrant$immigrant_attitude == "IMMTXINC"] <- "Pay more taxes to support immigrants"
-
-kgss2010_immigrant$value[kgss2010_immigrant$value == 8] <- NA
-kgss2010_immigrant$value[kgss2010_immigrant$value == 2] <- 0.25
-kgss2010_immigrant$value[kgss2010_immigrant$value == 3] <- 0
-kgss2010_immigrant$value[kgss2010_immigrant$value == 4] <- -0.25
-kgss2010_immigrant$value[kgss2010_immigrant$value == 5] <- -1
-
-# Plot
-kgss2010_immigrant %>%
-  filter(!is.na(party_f)) %>%
-  mutate(party_f = factor(party_f)) %>%
-  group_by(party_f, immigrant_attitude) %>%
-   summarise(mean = gmodels::ci(value, na.rm = TRUE)[1],
-            upper = gmodels::ci(value, na.rm = TRUE)[2],
-            lower = gmodels::ci(value, na.rm = TRUE)[3]) %>%
-  ggplot(aes(x = party_f, y = mean, ymax = upper, ymin = lower)) +
-    scale_x_discrete("Partisanship", labels=c("Conservative","Liberal")) +
-    geom_col() +
-    geom_errorbar() +
-    facet_wrap(~immigrant_attitude) +
-    labs(x = "Partisanship",
-         y = "Average response")
-
-ggsave(here("outputs", "immigrant_attitude.png"))
 ```

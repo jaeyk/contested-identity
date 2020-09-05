@@ -44,7 +44,7 @@ for (i in 1:length(script_list))
 theme_set(theme_pubr())
 ```
 
-## 1. Importing data
+# Importing data
 
 ```{r}
 
@@ -53,7 +53,7 @@ df <- read.csv(make_here("/home/jae/analyzing-list-experiments/processed_data/pr
 
 ```
   
-## 2. Testing ceiling and/or floor effect 
+# Testing ceiling and/or floor effect 
 
 ```{r}
 
@@ -86,7 +86,7 @@ ate.results$treat <- ate.results$treat %>%
          t3 = "Korean Chinese migrants",
          t4 = "Indonesian migrants")
 
-# Tidy model ouutcomes 
+# Tidy model outcomes 
 ate.results
 
 ```
@@ -97,13 +97,9 @@ ate.results
 
 ```{r}
 
-conservatives <- df %>% filter(ideology <= 2)
+conservatives <- df %>% filter(party_f == "Conservative Partisans")
 
-moderates <- df %>% filter(ideology == 3)
-
-liberals <- df %>% filter(ideology == 4 | ideology == 5)
-
-undecided <- df %>% filter(ideology == 6)
+liberals <- df %>% filter(party_f == "Liberal Partisans")
 
 ```
 
@@ -113,9 +109,7 @@ undecided <- df %>% filter(ideology == 6)
 
 cate.results <- bind_rows(
 mutate(diff_means_test(conservatives), subgroup = "Conservatives"),
-mutate(diff_means_test(moderates), subgroup = "Moderates"),
 mutate(diff_means_test(liberals), subgroup = "Liberals"),
-mutate(diff_means_test(undecided), subgroup = "Undecided")
 )
 
 # Recode values 
@@ -125,7 +119,7 @@ cate.results$treat <- cate.results$treat %>%
          t3 = "Korean Chinese migrants",
          t4 = "Indonesian migrants")
 
-# Tidy model ouutcomes 
+# Tidy model outcomes 
 cate.results
 
 ```
@@ -138,9 +132,7 @@ cate.results
 
 boot.cate.results <- bind_rows(
 mutate(boot_dmt(conservatives), subgroup = "Conservatives"),
-mutate(boot_dmt(moderates), subgroup = "Moderates"),
-mutate(boot_dmt(liberals), subgroup = "Liberals"),
-mutate(boot_dmt(undecided), subgroup = "Undecided")
+mutate(boot_dmt(liberals), subgroup = "Liberals")
 )
 
 # Recode values 
@@ -150,7 +142,7 @@ boot.cate.results$treat <- boot.cate.results$treat %>%
          t3 = "Korean Chinese migrants",
          t4 = "Indonesian migrants")
 
-# Tidy model ouutcomes 
+# Tidy model outcomes 
 boot.cate.results
 
 ```
@@ -160,49 +152,27 @@ boot.cate.results
 ```{r}
 
 ate.results %>%
-  ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
+  ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf)) +
   geom_pointrange() +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() + 
-  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  labs(title = "Treatment effects",
-  subtitle = " Direct bias: X group is stupid. \n Indirect bias: X group doesn't deserve support.",
-  caption = "Source: Original mobile survey (N = 1464)",
-  x = "Treatment status", y = "Estimated Average Treatment Effect",
-  col = "Bias type") 
+  labs(x = "", y = "Estimated ATE") +
+  facet_wrap(~var)
 
-ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png"), width = 10)
+ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png"))
 
-no_boot_plot <- cate.results %>%
-  ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
+````
+
+```{r}
+cate.results %>%
+  ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf)) +
   geom_pointrange() +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
-  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  facet_wrap(~treat) +
-  labs(title = "Heterogeneous treatment effects",
-  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
-  caption = "Source: Original mobile survey (N = 1464)",
-  x = "Conditions", y = "Conditional Estimated Average Treatment Effect",
-  col = "Bias type") +
-  ylim(c(-0.4, 1.2))
+#  scale_color_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
+  facet_grid(var~subgroup) +
+  labs(y = "Conditional estimated ATE",
+       x = "") 
 
-boot_plot <- boot.cate.results %>%
-  ggplot(aes(x = fct_reorder(subgroup, diff), y = diff, ymin = diff - conf, ymax = diff + conf, col = var)) +
-  geom_pointrange() +
-  geom_hline(yintercept = c(0), linetype = "dotted") +
-  coord_flip() +
-  scale_colour_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  facet_wrap(~treat) +
-  labs(title = "Heterogeneous treatment effects (with Bootstrapped CIs)",
-  subtitle = "Direct bias: X group is stupid. Indirect bias: X group doesn't deserve support.",
-  caption = "Source: Original mobile survey (N = 1464)",
-  x = "Conditions", y = "Conditional Estimated Average Treatment Effect",
-  col = "Bias type") +
-  ylim(c(-0.4, 1.2))
-
-ggarrange(no_boot_plot, boot_plot, common.legend = TRUE,
-          ncol = 1, nrow = 2)
-
-ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/cate_comparison_plot.png"), width = 10, height = 10)
+ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/cate_comparison_plot.png"))
 ```
