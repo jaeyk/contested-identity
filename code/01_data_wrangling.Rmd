@@ -2,57 +2,48 @@
 title: "Data wrangling"
 author: "Jae Yeon Kim"
 output:
-html_document: 
-  toc: true
-  theme: united
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: united
+    toc: yes
 ---
 
-## 0. Setup 
-
-I tweaked the global option of the R Markdown to enlarge figures produced by ggplot2.
-
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width = 12, fig.height = 8, 
-                      echo = FALSE, warning = FALSE, message = FALSE) # global setting for enlarging image size
-```
+# Setup 
 
 ```{r}
-
-# Clean up the environment
-
-rm(list = ls())
-
-# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-
-if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-        tidyverse, # for the tidyverse framework
-        ggpubr, # for arranging ggplots   
-        ggthemes, # for fancy ggplot themes
-        estimatr, # for fast estimation for design-based inference
-        list # stat methods for the item count technique and list experiment
+  tidyverse, # for the tidyverse framework
+  ggpubr, # for arranging ggplots
+  ggthemes, # for fancy ggplot themes
+  estimatr, # for fast estimation for design-based inference
+  list, # stat methods for the item count technique and list experiment
+  ggpubr, # arranging ggplots
+  ggthemes, # fancy ggplot themes
+  here # self-contained projects
 )
 
-```
-
-```{r}
-
-# Clean up the environment
-
-# rm(list = ls())
-
-# Import libraries (adapted from this link: https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them)
-
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(
-        tidyverse, # for the tidyverse framework
-        ggpubr, # for arranging ggplots   
-        ggthemes, # for fancy ggplot themes
-        estimatr, # for fast estimation for design-based inference
-        list, # stat methods for the item count technique and list experiment
-        ri2 # randomization inference for randomized experiments
+devtools::install_github("jaeyk/makereproducible",
+  dependencies = TRUE
 )
 
+library(makereproducible)
+
+# Import custom functions
+
+script_list <- list.files(paste0(here::here(), "/functions"),
+  pattern = "*.r|*.R",
+  full.names = TRUE
+)
+
+for (i in 1:length(script_list))
+{
+  source(script_list[[i]])
+}
+
+# for publication-friendly theme
+
+theme_set(theme_pubr())
 ```
 
 - To reduce sampling bias, I first matched the online panel with the existing probability sample (matched random sampling).
@@ -60,17 +51,18 @@ pacman::p_load(
 - I randomly divided these participants into four groups (one control plus three treatment groups) blocking on ideology.
 - I invited these 1,542 to the 2nd survey and 1,464 of them participated (response rate: 95%).
 
-## 1. Importing data
+# Importing data
 
 ```{r}
 
 # The entire dataset 
-survey <- read.csv("/home/jae/analyzing-list-experiments/processed_data/survey_result.csv")
+survey <- read.csv(make_here("/home/jae/analyzing-list-experiments/processed_data/survey_result.csv"))
+
 ```
 
-## 2. Wrangling data 
+# Wrangling data 
 
-### 2.1. Subsetting 
+## Subsetting 
 
 ```{r}
 # Subset those participated the pre- and post-survey = complete case analysis and drop columns that we don't need 
@@ -82,7 +74,7 @@ df <- survey %>%
 
 ```
 
-### 2.2. Renaming and recoding 
+## Renaming and recoding 
 
 ```{r}
 
@@ -101,10 +93,11 @@ names(df)[which(names(df) == "q2")] <- "indirect"
 
 ```
 
-## 4. Export the file 
+# Export the file 
 
 ```{r}
-write.csv(df, file = "/home/jae/analyzing-list-experiments/processed_data/processed_survey.csv")
+
+write.csv(df, make_here("/home/jae/analyzing-list-experiments/processed_data/processed_survey.csv"))
 
 ```
 
