@@ -177,26 +177,30 @@ robust_ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + co
 robust_qd1 <- analyze_multi_ate(robust_ate.par.q1) %>%
   plot_multi_ate() +
   labs(title = "Checking floor and ceiling effects", 
-       subtitle = "Partisanship")+
+       subtitle = "Partisanship",
+       tags = "A")+
   scale_x_discrete(labels = c("Liberal", "Income", "Male", "Age", "College", "Conservative"))
 
 
 robust_qd2 <- analyze_multi_ate(robust_ate.ideo.q1) %>%
   plot_multi_ate() +
   labs(title = "", 
-       subtitle = "Ideology")+
+       subtitle = "Ideology",
+       tags = "B")+
   scale_x_discrete(labels = c("Income", "Male", "Conservative", "Age", "Liberal", "College"))
 
 robust_qid1 <- analyze_multi_ate(robust_ate.par.q2) %>%
   plot_multi_ate() +
   labs(title = "Checking floor and ceiling effects", 
-       subtitle = "Partisanship")+
+       subtitle = "Partisanship",
+       tags = "A")+
   scale_x_discrete(labels = c("College", "Liberal", "Male", "Age", "Income", "Conservative"))
 
 robust_qid2 <- analyze_multi_ate(robust_ate.ideo.q2) %>%
   plot_multi_ate() +
   labs(title = "", 
-       subtitle = "Ideology")+
+       subtitle = "Ideology",
+       tags = "B")+
   scale_x_discrete(labels = c("Liberal", "College", "Male", "Age", "Income", "Conservative"))
 
 robust_qd1 / robust_qd2 
