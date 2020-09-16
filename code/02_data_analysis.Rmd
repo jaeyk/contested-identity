@@ -80,6 +80,9 @@ print(test.value.affirm)
 
 ```{r}
 
+test$age <- normalize(test$age)
+test$income <- normalize(test$income)
+
 ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
@@ -230,12 +233,13 @@ ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.
 
 ```{r}
 cate.results %>%
+  filter(var == "Indirect bias") %>%
   ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf)) +
   geom_pointrange() +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
 #  scale_color_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  facet_grid(var~subgroup) +
+  facet_grid(~subgroup) +
   labs(y = "Conditional estimated ATE",
        x = "") 
 

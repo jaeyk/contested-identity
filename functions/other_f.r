@@ -1,3 +1,7 @@
+normalize <- function(x) {
+        return ((x - min(x)) / (max(x) - min(x)))
+}
+
 replace_value <- function(data, var1, var2){
         
         data$nk_attitude[data$nk_attitude == {{var1}}] <- var2
@@ -43,9 +47,7 @@ control <- control[,-3]
 
 colnames(control) <- c("Name", "Estimate", "SE")
 
-result <- bind_rows(mutate(treat, Assignment = "Treatment"),
-                    mutate(control, Assignment = "Control"))
-result 
+treat
 }
 
 plot_multi_ate <- function(result){
@@ -54,10 +56,8 @@ result %>%
         filter(Name != "(Intercept)") %>%
         ggplot(aes(fct_reorder(Name, Estimate), Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
         geom_pointrange() +
-        facet_wrap(~Assignment) +
         geom_hline(yintercept = c(0), linetype = "dashed") +
         labs(x = "") +
-        ylim(c(-4,4)) +
         coord_flip()
         
 }
