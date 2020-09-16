@@ -66,7 +66,7 @@ bind_visualize <- function(df1, df2){
 bind_rows(mutate(tidy(df1, conf.int = TRUE), category = "External motivation"),
           mutate(tidy(df2, conf.int = TRUE), category = "Internal motivation")) %>%
         filter(term != "(Intercept)") %>%
-        ggplot(aes(x = term y = estimate, ymin = conf.low, ymax = conf.high)) +
+        ggplot(aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high)) +
         geom_pointrange() +
         coord_flip() +
         labs(y = "Estimate",
