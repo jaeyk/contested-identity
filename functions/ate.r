@@ -1,4 +1,74 @@
 
+
+analyze_multi_ate <- function(data){
+        
+        treat <- bind_cols(data$par.treat %>% tidy(), data$se.treat %>% tidy())
+        
+        treat <- treat[,-3]
+        
+        colnames(treat) <- c("Name", "Estimate", "SE")
+        
+        control <- bind_cols(data$par.control %>% tidy(), data$se.control %>% tidy())
+        
+        control <- control[,-3]
+        
+        colnames(control) <- c("Name", "Estimate", "SE")
+        
+        treat
+}
+
+plot_multi_ate <- function(result){
+        
+        result %>%
+                filter(Name != "(Intercept)") %>%
+                ggplot(aes(fct_reorder(Name, Estimate), Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
+                geom_pointrange() +
+                geom_hline(yintercept = c(0), linetype = "dashed") +
+                labs(x = "") +
+                coord_flip()
+        
+}
+
+
+ideo_label <- function(result){
+        
+        result %>%
+                filter(Name != "(Intercept)") %>%
+                ggplot(aes(fct_reorder(Name, Estimate), Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
+                geom_pointrange() +
+                geom_hline(yintercept = c(0), linetype = "dashed") +
+                labs(x = "") +
+                coord_flip() +
+                scale_x_discrete(labels = 
+                                         c("income" = "Income",
+                                           "age" = "Age",
+                                           "ideo_lib" = "Liberal",
+                                           "men" = "Male",
+                                           "college" = "College",
+                                           "ideo_con" = "Conservative"))
+        
+}
+
+party_label <- function(result){
+        
+        result %>%
+                filter(Name != "(Intercept)") %>%
+                ggplot(aes(fct_reorder(Name, Estimate), Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
+                geom_pointrange() +
+                geom_hline(yintercept = c(0), linetype = "dashed") +
+                labs(x = "") +
+                coord_flip() +
+                scale_x_discrete(labels = 
+                                         c("income" = "Income",
+                                           "age" = "Age",
+                                           "party_lib" = "Liberal",
+                                           "men" = "Male",
+                                           "college" = "College",
+                                           "party_con" = "Conservative"))
+        
+}
+
+
 select_nk_party <-function(data){
         dplyr::select(data, northwho, partyid)}
 

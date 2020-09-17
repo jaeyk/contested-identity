@@ -73,9 +73,8 @@ data(race)
 
 test.value.affirm <- ict.test(test$indirect, test$treat_f, J = 3, gms = TRUE)
 
-print(test.value.affirm)
-
 ```
+
 # Multivariate analysis 
 
 ## Without concerning floor and ceiling effects 
@@ -84,7 +83,7 @@ print(test.value.affirm)
 
 test$age <- normalize(test$age)
 test$income <- normalize(test$income)
-
+  
 ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
@@ -106,33 +105,28 @@ ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college +
          method = "ml") 
 
 qd1 <- analyze_multi_ate(ate.par.q1) %>%
-  plot_multi_ate() +
+  party_label() +
   labs(title = "Direct bias", 
        subtitle = "Partisanship",
-       tags = "A")+
-  scale_x_discrete(labels = c("Liberal", "Income", "Male", "Age", "College", "Conservative"))
-
+       tags = "A") 
 
 qd2 <- analyze_multi_ate(ate.ideo.q1) %>%
-  plot_multi_ate() +
+  ideo_label() +
   labs(title = "", 
        subtitle = "Ideology",
-       tags = "B")+
-  scale_x_discrete(labels = c("Income", "Male", "Conservative", "Age", "Liberal", "College"))
+       tags = "B")
 
 qid1 <- analyze_multi_ate(ate.par.q2) %>%
-  plot_multi_ate() +
+  party_label() +
   labs(title = "Indirect bias", 
        subtitle = "Partisanship",
-       tags = "A") +
-  scale_x_discrete(labels = c("College", "Liberal", "Male", "Age", "Income", "Conservative"))
+       tags = "C") 
 
 qid2 <- analyze_multi_ate(ate.ideo.q2) %>%
-  plot_multi_ate() +
+  ideo_label() +
   labs(title = "", 
        subtitle = "Ideology",
-       tags = "B")+
-  scale_x_discrete(labels = c("Liberal", "College", "Male", "Age", "Income", "Conservative"))
+       tags = "D")
 
 qd1 / qd2 
 ggsave(here("outputs", "multi_direct.png"))
@@ -140,74 +134,38 @@ ggsave(here("outputs", "multi_direct.png"))
 qid1 / qid2
 ggsave(here("outputs", "multi_indirect.png"))
 
+ggarrange(qd1, qd2, qid1, qid2, common.legend = TRUE)
+ggsave(here("outputs", "multi_combined.png"))
+
 ```
 
-## Concerning floor and ceiling effects 
+# Response distributions 
 
 ```{r}
 
-robust_ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         floor = TRUE, 
-         ceiling = TRUE,
-         method = "lm")
+df %>%
+  select(direct, indirect, treat) %>%
+  rename("Direct bias" = "direct",
+         "Indirect bias" = "indirect") %>%
+  mutate(treat = case_when(
+         treat == "1" ~ "Control",
+         treat == "2" ~ "Low-income S. Koreans",
+         treat == "3" ~ "North Korean refugees",
+         treat == "4" ~ "Korean Chinese migrants",
+         treat == "5" ~ "Indonesian migrants")) %>%
+  mutate(treat = fct_relevel(treat, c("Control", "Low-income S. Koreans", "North Korean refugees", "Korean Chinese migrants", "Indonesian migrants"))) %>%
+  pivot_longer(cols = c("Direct bias", "Indirect bias"),
+               names_to = "Type",
+               values_to = "Value") %>%
+  mutate(Value = as.numeric(Value)) %>%
+  ggplot(aes(x = Value, col = treat)) +
+    geom_density() +
+    facet_grid(~Type) +
+    labs(x = "Response",
+         y = "Count",
+         col = "Treatment condition") 
 
-robust_ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         floor = TRUE, 
-         ceiling = TRUE,
-         method = "lm")
-
-robust_ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         floor = TRUE, 
-         ceiling = TRUE,
-         method = "lm")
-
-robust_ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         floor = TRUE, 
-         ceiling = TRUE,
-         method = "lm")
-
-robust_qd1 <- analyze_multi_ate(robust_ate.par.q1) %>%
-  plot_multi_ate() +
-  labs(title = "Checking floor and ceiling effects", 
-       subtitle = "Partisanship",
-       tags = "A")+
-  scale_x_discrete(labels = c("Liberal", "Income", "Male", "Age", "College", "Conservative"))
-
-
-robust_qd2 <- analyze_multi_ate(robust_ate.ideo.q1) %>%
-  plot_multi_ate() +
-  labs(title = "", 
-       subtitle = "Ideology",
-       tags = "B")+
-  scale_x_discrete(labels = c("Income", "Male", "Conservative", "Age", "Liberal", "College"))
-
-robust_qid1 <- analyze_multi_ate(robust_ate.par.q2) %>%
-  plot_multi_ate() +
-  labs(title = "Checking floor and ceiling effects", 
-       subtitle = "Partisanship",
-       tags = "A")+
-  scale_x_discrete(labels = c("College", "Liberal", "Male", "Age", "Income", "Conservative"))
-
-robust_qid2 <- analyze_multi_ate(robust_ate.ideo.q2) %>%
-  plot_multi_ate() +
-  labs(title = "", 
-       subtitle = "Ideology",
-       tags = "B")+
-  scale_x_discrete(labels = c("Liberal", "College", "Male", "Age", "Income", "Conservative"))
-
-robust_qd1 / robust_qd2 
-ggsave(here("outputs", "robust_multi_direct.png"))
-
-robust_qid1 / robust_qid2
-ggsave(here("outputs", "robust_multi_indirect.png"))
+ggsave(here("outputs", "res_dist.png"))
 
 ```
 
