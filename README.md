@@ -9,7 +9,7 @@ In this project, [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-pr
 ## Research design
 
 ### Random assignment
-The experimental manipulation is in the statements that are read. We divided survey participants into control and treatment groups. The control group was exposed to a list of naive statements (e.g., about the weather or sports). The treatment groups were exposed to an identical list plus one sensitive statement that accounts for ethnic bias. Subsequently, we asked them to report how many statements they supported. Since the researcher did not know which specific items a respondent agreed with, the respondents knew that their privacy was protected.
+The experimental manipulation is in the statements that are read. We divided survey participants into control and treatment groups. The control group was exposed to a list of naive statements (e.g., about the weather or sports). The treatment groups were exposed to an identical list plus one sensitive statement that accounts for ethnic bias. Subsequently, we asked them to report how many statements they supported. Since the researcher did not know which specific items a respondent agreed with, the respondents knew that their privacy was protected.
 
 ### Block random assignment
 We assumed that political ideology is a covariate because the Korean conservative ideology has emphasized anti-Communism and the liberal political ideology has stressed ethnic unity. We hypothesized that this contrasting position toward North Korea could also be manifested in the way in which conservatives and liberals view North Korean refugees. For that reason, we did a random assignment blocking on political ideology. Random assignment ensures covariate balances between treatment and control groups by design. However, variability exists in sampling. Even though the differences-in-means are unbiased estimators of average treatment effects (ATEs; the difference between two potential outcomes), we should still worry about uncertainty around these estimates. For example, by chance, most liberals could be assigned to the control group, whereas most conservatives could be assigned to the treatment group. Even if an unbalanced assignment occurs, it does not mean that these individuals are selected into these groups. Nevertheless, in a circumstance like this, the difference-in-means becomes a less precise estimate of the ATE. Block random assignment reduces sampling variability by making sure a specific proportion of a subgroup of interest is assigned to treatment ([Gerber and Green 2012](https://isps.yale.edu/FEDAI): 73).
@@ -86,12 +86,8 @@ Figure 1. Estimated Average Treatment Effects
 
 Figure 1 shows the effects of estimated average treatment. We only find evidence of indirect bias toward North Korean refugees but not direct bias. Another noticeable fact is that the extent to which South Korean citizens hold a bias toward North Korean refugees is similar to their attitude toward Indonesian migrant workers.
 
-![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/cate_comparison_plot.png)
-Figure 2. Estimated Conditional Average Treatment Effects
-
-Figure 2 compares the estimated effects of conditional average treatment. Interestingly, no strong partisan difference exists concerning South Korean citizens' attitudes towards North Korean refugees.
+[Add multivariate analysis]
 
 ## Conclusion remarks
 
-- In the additional analysis, we have found something interesting about how party ID interacts with responses. However, we are cautioned to make a strong claim about this pattern because we did not use party ID as a blocking variable. This relationship is an association.
 - We would also note that list experiments have many limitations. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.

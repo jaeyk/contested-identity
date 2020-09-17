@@ -88,22 +88,22 @@ test$income <- normalize(test$income)
 ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
-         method = "lm")
+         method = "ml")
 
 ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
-         method = "lm")
+         method = "ml")
 
 ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
-         method = "lm")
+         method = "ml")
 
 ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
                  J = 3, 
          data = test, 
-         method = "lm") 
+         method = "ml") 
 
 qd1 <- analyze_multi_ate(ate.par.q1) %>%
   plot_multi_ate() +
@@ -232,66 +232,8 @@ ate.results$treat <- ate.results$treat %>%
 
 # Tidy model outcomes 
 ate.results
-
 ```
-
-# Conditional ATE
-
-## Subsetting
-
-```{r}
-
-conservatives <- df %>% filter(ideo_con == 1)
-
-liberals <- df %>% filter(ideo_lib == 1)
-
-```
-
-## Conditional ATE outcomes
-
-```{r}
-
-cate.results <- bind_rows(
-mutate(diff_means_test(conservatives), subgroup = "Conservatives"),
-mutate(diff_means_test(liberals), subgroup = "Liberals"),
-)
-
-# Recode values 
-cate.results$treat <- cate.results$treat %>%
-  recode(t1 = "Low-income S. Koreans",
-         t2 = "North Korean refugees",
-         t3 = "Korean Chinese migrants",
-         t4 = "Indonesian migrants")
-
-# Tidy model outcomes 
-cate.results
-
-```
-
-# Bootstrapping  
-
-## Recalculating CIs for CATE
-
-```{r}
-
-boot.cate.results <- bind_rows(
-mutate(boot_dmt(conservatives), subgroup = "Conservatives"),
-mutate(boot_dmt(liberals), subgroup = "Liberals")
-)
-
-# Recode values 
-boot.cate.results$treat <- boot.cate.results$treat %>%
-  recode(t1 = "Low-income S. Koreans",
-         t2 = "North Korean refugees",
-         t3 = "Korean Chinese migrants",
-         t4 = "Indonesian migrants")
-
-# Tidy model outcomes 
-boot.cate.results
-
-```
-
-# Visualizing results 
+## Visualizing results 
 
 ```{r}
 
@@ -309,15 +251,14 @@ ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.
 
 ```{r}
 cate.results %>%
-  filter(var == "Indirect bias") %>%
-  ggplot(aes(x = fct_reorder(treat, diff), y = diff, ymin = diff - conf, ymax = diff + conf)) +
+  ggplot(aes(x = fct_reorder(group, Estimate), y = Estimate, ymin = Estimate - 2*SE, ymax = Estimate + 2*SE)) +
   geom_pointrange() +
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() +
 #  scale_color_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  facet_grid(~subgroup) +
   labs(y = "Conditional estimated ATE",
        x = "") 
 
 ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/cate_comparison_plot.png"))
+
 ```

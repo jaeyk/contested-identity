@@ -2,6 +2,36 @@
 select_nk_party <-function(data){
         dplyr::select(data, northwho, partyid)}
 
+calculate_cate <- diff_means_test <- function(data) {
+        
+        diff_summary <- data %>%
+                
+                # Summarize 
+                summarise_each(
+                        funs(
+                                
+                                # Different in means 
+                                diff_t = mean(.[treat == 3], na.rm = T) - mean(.[treat == 1], na.rm = T),
+                                
+                                # Calculating confidence intervals
+                                
+                                
+                                conf_t = (t.test(.[treat == 3], .[treat == 1])$conf.int[2] - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
+                                
+                        ),
+                        direct, indirect
+                )
+        
+        diff_summary %>%
+                gather(stat, val) %>% # stat = variables, val = values 
+                separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values  
+                spread(stat, val) %>% # reorder columns
+                mutate(var = replace(var, var == "direct", "Direct bias")) %>% # rename variables 
+                mutate(var = replace(var, var == "indirect", "Indirect bias")) 
+        
+}
+
+        
 diff_means_test <- function(data) {
         
         diff_summary <- data %>%
