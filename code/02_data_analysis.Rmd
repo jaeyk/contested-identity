@@ -59,19 +59,15 @@ df <- read.csv(make_here("/home/jae/analyzing-list-experiments/processed_data/pr
 
 - Tested design effect using Bonferroni-corrected p-value. If this value is below alpha, you reject the null hypothesis of no design effect. If it is above alpha, you fail to reject the null.
 
-- Direct bias: Above alpha. No design effect.
-- Indirect bias: Above alpha. No design effect.
+- Direct bias: Above alpha. No design effect across all condition groups.
+- Indirect bias: Above alpha. No design effect across all condition groups.
 
 ```{r}
 
-test <- subset(df, treat == 1 | treat == 3)
-
-test$treat_f <- ifelse(test$treat == 3, 1, 0)
-
-data(affirm)
-data(race)
-
-test.value.affirm <- ict.test(test$indirect, test$treat_f, J = 3, gms = TRUE)
+design_test(df, 2)
+design_test(df, 3)
+design_test(df, 4)
+design_test(df, 5)
 
 ```
 
@@ -79,63 +75,16 @@ test.value.affirm <- ict.test(test$indirect, test$treat_f, J = 3, gms = TRUE)
 
 ## Without concerning floor and ceiling effects 
 
+- When ML failed: system is computationally singular
+
 ```{r}
 
-test$age <- normalize(test$age)
-test$income <- normalize(test$income)
-  
-ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         method = "ml")
+visualize_multi_ate_group(df, 3, "ml", "NK refugees", -8, 5) / 
+visualize_multi_ate_group(df, 2, "ml", "Low income S. Koreans", -8, 5) / 
+visualize_multi_ate_group(df, 4, "ml", "Korean Chinese migrants", -8, 5) 
 
-ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         method = "ml")
-
-ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         method = "ml")
-
-ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
-                 J = 3, 
-         data = test, 
-         method = "ml") 
-
-qd1 <- analyze_multi_ate(ate.par.q1) %>%
-  party_label() +
-  labs(title = "Direct bias", 
-       subtitle = "Partisanship",
-       tags = "A") 
-
-qd2 <- analyze_multi_ate(ate.ideo.q1) %>%
-  ideo_label() +
-  labs(title = "", 
-       subtitle = "Ideology",
-       tags = "B")
-
-qid1 <- analyze_multi_ate(ate.par.q2) %>%
-  party_label() +
-  labs(title = "Indirect bias", 
-       subtitle = "Partisanship",
-       tags = "C") 
-
-qid2 <- analyze_multi_ate(ate.ideo.q2) %>%
-  ideo_label() +
-  labs(title = "", 
-       subtitle = "Ideology",
-       tags = "D")
-
-qd1 / qd2 
-ggsave(here("outputs", "multi_direct.png"))
-
-qid1 / qid2
-ggsave(here("outputs", "multi_indirect.png"))
-
-ggarrange(qd1, qd2, qid1, qid2, common.legend = TRUE)
-ggsave(here("outputs", "multi_combined.png"))
+ggsave(here("outputs", "multi_combined.png"),
+       height = 10, width = 10)
 
 ```
 
@@ -163,7 +112,8 @@ df %>%
     facet_grid(~Type) +
     labs(x = "Response",
          y = "Count",
-         col = "Treatment condition") 
+         col = "Treatment status") +
+    guides(col = guide_legend(nrow = 3, byrow=TRUE))
 
 ggsave(here("outputs", "res_dist.png"))
 
@@ -201,22 +151,9 @@ ate.results %>%
   geom_hline(yintercept = c(0), linetype = "dotted") +
   coord_flip() + 
   labs(x = "", y = "Estimated ATE") +
-  facet_wrap(~var)
+  facet_wrap(~var) +
+  geom_text(aes(label = paste(round(diff,2))), position=position_dodge(width = 0.9),  vjust=-0.40)
 
 ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/ate_results_plot.png"))
 
 ````
-
-```{r}
-cate.results %>%
-  ggplot(aes(x = fct_reorder(group, Estimate), y = Estimate, ymin = Estimate - 2*SE, ymax = Estimate + 2*SE)) +
-  geom_pointrange() +
-  geom_hline(yintercept = c(0), linetype = "dotted") +
-  coord_flip() +
-#  scale_color_manual(values = c("Direct bias" = "red", "Indirect bias" = "blue")) +
-  labs(y = "Conditional estimated ATE",
-       x = "") 
-
-ggsave(make_here("/home/jae/analyzing-list-experiments/outputs/cate_comparison_plot.png"))
-
-```

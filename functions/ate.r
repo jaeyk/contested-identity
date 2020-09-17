@@ -1,4 +1,84 @@
 
+visualize_multi_ate_group <- function(df, condition, model, subgroup, low, high){
+        
+        test <- subset_group(df, condition)
+        test$age <- normalize(test$age)
+        test$income <- normalize(test$income)
+        
+        ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                              J = 3, 
+                              data = test, 
+                              method = model)
+        
+        ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                             J = 3, 
+                             data = test, 
+                             method = model)
+        
+        ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                              J = 3, 
+                              data = test, 
+                              method = model)
+        
+        ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                             J = 3, 
+                             data = test, 
+                             method = model) 
+        
+        party <- bind_rows(mutate(analyze_multi_ate(ate.par.q1),
+                                   Type = "Direct bias", Condition = "Partisanship"), 
+                           mutate(analyze_multi_ate(ate.par.q2),
+                                  Type = "Indirect bias", Condition = "Partisanship"))
+                           
+        ideo <- bind_rows(mutate(analyze_multi_ate(ate.ideo.q1),
+                                   Type = "Direct bias", Condition = "Ideology"),
+                            mutate(analyze_multi_ate(ate.ideo.q2),
+                                   Type = "Indirect bias", Condition = "Ideology"))
+        
+        party_plot <- party %>%
+                filter(Name != "(Intercept)") %>%
+                mutate(Name = fct_relevel(Name, c("men", "age", "college", "income", "party_lib", "party_con"))) %>%
+                ggplot(aes(Name, Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
+                geom_pointrange() +
+                geom_hline(yintercept = c(0), linetype = "dashed") +
+                labs(x = "") +
+                coord_flip() +
+                facet_grid(~Type) +
+                scale_x_discrete(labels = 
+                                         c("income" = "Income",
+                                           "age" = "Age",
+                                           "party_lib" = "Liberal",
+                                           "men" = "Male",
+                                           "college" = "College",
+                                           "party_con" = "Conservative")
+                                           ) +
+                labs(subtitle = "Partisanship",
+                     title = {{subgroup}}) +
+                ylim(c({{low}}, {{high}})) 
+        
+        ideo_plot <- ideo %>%
+                filter(Name != "(Intercept)") %>%
+                mutate(Name = fct_relevel(Name, c("men", "age", "college", "income", "ideo_lib", "ideo_con"))) %>%
+                ggplot(aes(Name, Estimate, ymax = Estimate + SE, ymin = Estimate - SE)) +
+                geom_pointrange() +
+                geom_hline(yintercept = c(0), linetype = "dashed") +
+                labs(x = "") +
+                coord_flip() +
+                facet_grid(~Type) +
+                scale_x_discrete(labels = 
+                                         c("income" = "Income",
+                                           "age" = "Age",
+                                           "men" = "Male",
+                                           "college" = "College",
+                                           "ideo_lib" = "Liberal",
+                                           "ideo_con" = "Conservative")
+                ) +
+                labs(subtitle = "Ideology") +
+                ylim(c({{low}}, {{high}}))
+        
+        party_plot + ideo_plot 
+        
+}
 
 analyze_multi_ate <- function(data){
         

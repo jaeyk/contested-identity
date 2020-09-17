@@ -1,27 +1,19 @@
 
-ideo_label <- function(ggplot){
-        
-        ggplot +
-                scale_x_discrete(labels = 
-                                         c("income" = "Income",
-                                           "age" = "Age",
-                                           "ideo_lib" = "Liberal",
-                                           "men" = "Male",
-                                           "college" = "College",
-                                           "ideo_con" = "Conservative"))
-        
+subset_group <- function(df, condition){
+
+        test <- subset(df, treat == 1 | treat == condition)
+
+        test$treat_f <- ifelse(test$treat == condition, 1, 0)
+
+        test 
+
 }
 
-party_label <- function(ggplot){
+design_test <- function(df, condition){
+
+        test <- subset_group(df, condition)
         
-        ggplot +
-        scale_x_discrete(labels = 
-                         c("income" = "Income",
-                           "age" = "Age",
-                           "party_lib" = "Liberal",
-                           "men" = "Male",
-                           "college" = "College",
-                           "party_con" = "Conservative"))
+        ict.test(test$indirect, test$treat_f, J = 3, gms = TRUE)
 
 }
 

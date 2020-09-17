@@ -107,20 +107,8 @@ df$party_f <- factor(df$party,
 df$party_lib <- ifelse(df$party_f == "Liberal Partisans", 1 , 0) 
 df$party_con <- ifelse(df$party_f == "Conservative Partisans", 1 , 0)
 
-## I specified partian responses into characters.
-df$ideology[df$ideology %in% 1] <- "Lib"
-df$ideology[df$ideology %in% 2] <- "Lib"
-df$ideology[df$ideology %in% 3] <- "Moderate"
-df$ideology[df$ideology %in% 4] <- "Con"
-df$ideology[df$ideology %in% 5] <- "Con"
-df$ideology[df$ideology %in% 6] <- "Don't know"
-
-df$ideo_f <- factor(df$ideology,
-  levels = c("Lib", "Moderate", "Con", "Don't know")
-)
-
-df$ideo_con <- ifelse(df$ideo_f == "Con", 1, 0)
-df$ideo_lib <- ifelse(df$ideo_f == "Lib", 1, 0)
+df$ideo_con <- ifelse(df$ideology == 4 | df$ideology == 5, 1, 0)
+df$ideo_lib <- ifelse(df$ideology == 1 | df$ideology == 2, 1, 0)
 
 df$college <- ifelse(df$edu1 == 4 | df$edu1 == 5, 1, 0)
 
