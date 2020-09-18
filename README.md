@@ -11,8 +11,8 @@ In this project, [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-pr
 ### Random assignment
 The experimental manipulation is in the statements that are read. We divided survey participants into control and treatment groups. The control group was exposed to a list of naive statements (e.g., about the weather or sports). The treatment groups were exposed to an identical list plus one sensitive statement that accounts for ethnic bias. Subsequently, we asked them to report how many statements they supported. Since the researcher did not know which specific items a respondent agreed with, the respondents knew that their privacy was protected.
 
-### Block random assignment
-We assumed that political ideology is a covariate because the Korean conservative ideology has emphasized anti-Communism and the liberal political ideology has stressed ethnic unity. We hypothesized that this contrasting position toward North Korea could also be manifested in the way in which conservatives and liberals view North Korean refugees. For that reason, we did a random assignment blocking on political ideology. Random assignment ensures covariate balances between treatment and control groups by design. However, variability exists in sampling. Even though the differences-in-means are unbiased estimators of average treatment effects (ATEs; the difference between two potential outcomes), we should still worry about uncertainty around these estimates. For example, by chance, most liberals could be assigned to the control group, whereas most conservatives could be assigned to the treatment group. Even if an unbalanced assignment occurs, it does not mean that these individuals are selected into these groups. Nevertheless, in a circumstance like this, the difference-in-means becomes a less precise estimate of the ATE. Block random assignment reduces sampling variability by making sure a specific proportion of a subgroup of interest is assigned to treatment ([Gerber and Green 2012](https://isps.yale.edu/FEDAI): 73).
+#### Blocking and Stratifying
+When randomly assigning participants to different conditions, we blocked on political ideology and stratified on region to reduce sampling variance in the data and increase statistical power ([Gerber and Green 2012](https://isps.yale.edu/FEDAI): 73). 
 
 ### Random ordering
 The order of the two experiments is rotated so that we can circumvent the possible contamination effects of question order.
@@ -37,57 +37,30 @@ In the rest of the document, I state how I have **wrangled**, **analyzed**, and 
 
 ### Data wrangling [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/01_data_wrangling.Rmd)]
 
-- There is nothing particular here. I dropped irrelevant columns from the survey data and changed key variable names to make them more intelligible.
+- There is nothing particular here. I dropped irrelevant columns from the survey data, changed key variable names to make them more intelligible, and created some dummy variables.
 
 ### Data analysis [[Code](https://github.com/jaeyk/analyzing-list-experiments/blob/master/code/02_data_analysis.Rmd)]
 
-- Average treatment effect (ATE): As alluded, I used difference-in-means as an estimator of the average treatment effect. As can be seen below, using `dplyr` is quite handy in dealing with multiple treatment groups and treatment conditions. I calculated 95% confidence intervals using two-paired t-tests.
+- Average treatment effect (ATE): We used the average treatment effects (ATEs), the difference between the mean of the treatment ($E[Y_{i}(1)]$) and that of the control group ($E[Y_{i}(0)]$), to estimate the causal effects of the manipulations. This estimator is unbiased because random assignment ensures independence between the treatment condition and the potential outcomes.
 
-- Conditional average treatment effect (CATE): Ideology was used as a blocking variable. Thus, ideology is unrelated to the assignment process. I subdivided the survey data according to the respondents' ideological position and calculated difference-in-means within each stratum. These differences-in-means are unbiased estimators of average treatment effects that are conditional on ideology.
+- Multivariate regression analysis: We investigated what factors contribute to South Koreans' direct and indirect biases against North Korean refugees. Using the ['list'](https://cran.r-project.org/web/packages/list/list.pdf) package in R. We constructed a regression model as specified below. We then fitted it to three subgroups of co-ethnic data (North Korean refugees, low-income South Koreans, and Korean Chinese migrants). We used either partisanship or ideology variables across these models, as they are highly correlated. If changing these variables does not alter results, then the reliability of the findings increases. Other covariates were selected due to their known relationship with partisanship or ideology variables.
 
-```r
-diff_means_test <- function(data, treat, direct, indirect) {
+$Y_{i} = \beta_{0} + \beta_{1}\textrm{Partisanship/Ideology} + \beta_{2}\textrm{Gender}_{i} + \beta_{3}\textrm{Age}_{i} + \beta_{4}\textrm{Income}_{i} +
+\beta_{5}\textrm{Education}_{i} + \epsilon$
 
-  diff_summary <- data %>%
-
-    # Summarize
-    summarise_each(
-      funs(
-
-        # Different in means
-        diff_t1 = mean(.[treat == 2], na.rm = T) - mean(.[treat == 1], na.rm = T),
-        diff_t2 = mean(.[treat == 3], na.rm = T) - mean(.[treat == 1], na.rm = T),
-        diff_t3 = mean(.[treat == 4], na.rm = T) - mean(.[treat == 1], na.rm = T),
-        diff_t4 = mean(.[treat == 5], na.rm = T) - mean(.[treat == 1], na.rm = T),
-
-        # Calculating confidence intervals
-        conf_t1 = ((t.test(.[treat == 2], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t2 = ((t.test(.[treat == 3], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t3 = ((t.test(.[treat == 4], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2,
-        conf_t4 = ((t.test(.[treat == 5], .[treat == 1])$conf.int[2]) - t.test(.[treat == 1], .[treat == 1])$conf.int[1]) / 2
-      ),
-      direct, indirect
-    )
-
-  diff_summary %>%
-    gather(stat, val) %>% # stat = variables, val = values
-    separate(stat, into = c("var", "stat", "treat"), sep = "_") %>% # var = measures, stat = diff or conf, group = treatment status, val = values
-    spread(stat, val) %>% # reorder columns
-    mutate(var = replace(var, var == "direct", "Direct bias")) %>% # rename variables
-    mutate(var = replace(var, var == "indirect", "Indirect bias"))
-
-}
-```
-
-### Data visualization [[Outputs](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/)]
+### Difference-in-means analysis [[Outputs](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/)]
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/ate_results_plot.png)
 Figure 1. Estimated Average Treatment Effects
 
-Figure 1 shows the effects of estimated average treatment. We only find evidence of indirect bias toward North Korean refugees but not direct bias. Another noticeable fact is that the extent to which South Korean citizens hold a bias toward North Korean refugees is similar to their attitude toward Indonesian migrant workers.
+Figure 1 shows the effects of estimated average treatment. The average effect size of direct bias outcomes was small (0.12). Furthermore, these effects were not statistically significant. In contrast, across all condition groups, the effect size of indirect bias was relatively large and statistically significant. South Korean respondents hold biases against North Korean refugees that are five times stronger when primed by indirect (0.35) rather than direct bias (0.07). Furthermore, the fact that South Korean respondents hold indirect biases against North Korean refugees equal in magnitude to their indirect bias against Indonesian migrant workers (0.36) is substantial because many studies have reported on South Koreans' discriminatory behaviors against Indonesian migrant workers
 
-[Add multivariate analysis]
+## Multivarite regression analysis [[Outputs](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/)]
 
-## Conclusion remarks
+![](https://github.com/jaeyk/analyzing-list-experiments/raw/master/outputs/multi_combined.png)
 
-- We would also note that list experiments have many limitations. As [this World Bank blog](https://dimewiki.worldbank.org/wiki/List_Experiments) nicely summarized, this design introduces noise to the data and potentially influences the treatment on the distribution of responses. [Blair and Imai](https://imai.fas.harvard.edu/research/files/listP.pdf) (2012) developed a set of statistical methods to address these problems.
+Figure 2. Multivariate regression analysis outputs
+
+The top panel shows that political variables were associated with indirect bias against North Korean refugees but in limited ways. Partisanship and ideology were substantially and statistically significantly associated with indirect but not direct bias. Specifically, liberal partisanship (-1.23) and ideology (-1.72) were negatively associated with indirect bias. In contrast, conservative partisanship and political ideology did not have any statistically significant relationship with either of the bias measures.
+
+Income was associated with a biased attitude toward North Korean refugees in contrasting ways, depending on the context. When primed by the direct-bias-sensitive item, the poor respondents agreed more with the item than the rich respondents. This pattern is indicated by the negative income coefficient. However, when primed by the indirect-bias-sensitive item, the rich respondents agreed more with the item than the poor respondents. This pattern was evidenced in the positive income coefficient. More importantly, the effect size of the income effect was large, especially in the direct bias condition. Specifically, the size of income variable for the direct bias measure was on average seven times larger than that of liberal partisan and ideology variables. In contrast, the size of income variable for the indirect bias was on average 45% larger than that of liberal partisan and ideology variables.

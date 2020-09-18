@@ -13,6 +13,9 @@ output:
 
 ```{r}
 
+# kable output: LaTeX
+options(knitr.table.format = "latex")
+
 pacman::p_load(
         tidyverse, # for the tidyverse framework
         ggpubr, # for arranging ggplots   
@@ -79,12 +82,21 @@ design_test(df, 5)
 
 ```{r}
 
-visualize_multi_ate_group(df, 3, "ml", "NK refugees", -8, 5) / 
+visualize_multi_ate_group(df, 3, "ml", "North Korean refugees", -8, 5) / 
 visualize_multi_ate_group(df, 2, "ml", "Low income S. Koreans", -8, 5) / 
 visualize_multi_ate_group(df, 4, "ml", "Korean Chinese migrants", -8, 5) 
 
 ggsave(here("outputs", "multi_combined.png"),
        height = 10, width = 10)
+
+reg_table <- table_multi_ate(df, 3, "ml", "North Korean refugees", -8, 5) %>%
+  filter(Name %in% c("party_lib", "ideo_lib", "income")) %>%
+  group_by(Type, Condition, Name) %>%
+  summarise(mean_est = round(mean(abs(Estimate)),2))
+  
+reg_table %>%
+  arrange(mean_est) %>%
+  kableExtra::kable(booktabs = TRUE)
 
 ```
 

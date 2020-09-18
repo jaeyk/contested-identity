@@ -80,6 +80,47 @@ visualize_multi_ate_group <- function(df, condition, model, subgroup, low, high)
         
 }
 
+
+table_multi_ate <- function(df, condition, model, subgroup, low, high){
+        
+        test <- subset_group(df, condition)
+        test$age <- normalize(test$age)
+        test$income <- normalize(test$income)
+        
+        ate.ideo.q1 <- ictreg(direct ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                              J = 3, 
+                              data = test, 
+                              method = model)
+        
+        ate.par.q1 <- ictreg(direct ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                             J = 3, 
+                             data = test, 
+                             method = model)
+        
+        ate.ideo.q2 <- ictreg(indirect ~ ideo_con + ideo_lib + income + men + college + age, treat = "treat_f", 
+                              J = 3, 
+                              data = test, 
+                              method = model)
+        
+        ate.par.q2 <- ictreg(indirect ~ party_con + party_lib + income + men + college + age, treat = "treat_f", 
+                             J = 3, 
+                             data = test, 
+                             method = model) 
+        
+        party <- bind_rows(mutate(analyze_multi_ate(ate.par.q1),
+                                  Type = "Direct bias", Condition = "Partisanship"), 
+                           mutate(analyze_multi_ate(ate.par.q2),
+                                  Type = "Indirect bias", Condition = "Partisanship"))
+        
+        ideo <- bind_rows(mutate(analyze_multi_ate(ate.ideo.q1),
+                                 Type = "Direct bias", Condition = "Ideology"),
+                          mutate(analyze_multi_ate(ate.ideo.q2),
+                                 Type = "Indirect bias", Condition = "Ideology"))
+        
+        bind_rows(party, ideo) 
+        
+}
+
 analyze_multi_ate <- function(data){
         
         treat <- bind_cols(data$par.treat %>% tidy(), data$se.treat %>% tidy())
