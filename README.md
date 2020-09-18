@@ -1,6 +1,6 @@
 # analyzing-list-experiments
 
-**Analyzing List Experiments Using Block Random Assignment**
+**Analyzing List Experiments**
 
 ## Motivation
 
