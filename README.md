@@ -1,24 +1,27 @@
 # Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea
 
-## Motivation
-
-In this project, [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) and I have tried to understand to what extent South Korean citizens hold a biased attitude towards North Korean refugees. However, measuring sensitive attitudes in a survey is difficult because people tend to underreport their socially unpopular opinions, an effect also known as the [social desirability bias](https://en.wikipedia.org/wiki/Social_desirability_bias). We overcame this problem by using a survey questionnaire technique called [list experiment](https://dimewiki.worldbank.org/wiki/List_Experiments). In a list experiment, rather than bluntly ask the respondents what they think about North Korean refugees, respondents are instead given a list of items that include a sensitive statement about North Korean refugees and simply asked how many items they agreed with. Taeku Lee and I contributed equally to the research design, and I was responsible for most of the data analysis.
+Co-authors: Jae Yeon Kim (jkim@kdischool.ac.kr, corresponding author), [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) 
 
 ## Research design
 
 ### Random assignment
+
 The experimental manipulation is in the statements that are read. We divided survey participants into control and treatment groups. The control group was exposed to a list of naive statements (e.g., about the weather or sports). The treatment groups were exposed to an identical list plus one sensitive statement that accounts for ethnic bias. Subsequently, we asked them to report how many statements they supported. Since the researcher did not know which specific items a respondent agreed with, the respondents knew that their privacy was protected.
 
 #### Blocking and Stratifying
+
 When randomly assigning participants to different conditions, we blocked on political ideology and stratified on region to reduce sampling variance in the data and increase statistical power ([Gerber and Green 2012](https://isps.yale.edu/FEDAI): 73). 
 
 ### Random ordering
+
 The order of the two experiments is rotated so that we can circumvent the possible contamination effects of question order.
 
 ### Direct and indirect bias measures
+
 In addition, we distinguished direct (stereotype) and indirect bias (more policy-driven) and measured both of them. For want of space, I did not delve into why their differences matter from the perspective of political psychology and racial and ethnic politics.
 
 ## Data collection: Mobile Survey Using Matched Random Sampling
+
 To reduce the cost of survey collection, we used a smartphone app-based survey. The mobile survey is good as increasingly more people only use mobile phones. The 2015 National Health Interview Survey conducted by the National Center for Health Statistics reports that nearly one-half of American homes (47.4%) use only wireless telephones. Using a smartphone app-based survey is particularly relevant in South Korea as the country is the most wired in the world. The South Korean smartphone ownership rate is the world's highest according to the 2016 Pew Research Center report. Among the 18–34 age group, the rate was 100%. Even for the 35+ age group, the rate was still impressive at 83%.
 
 One problem with the smartphone app approach is the non-representativeness of the sample. The online panel provided by the survey firm we hired uses an opt-in sample. As such, it does not guarantee a representative sample. To tackle that problem, we used a matched sampling method advocated by previous studies ([Rivers 2007](https://static.texastribune.org/media/documents/Rivers_matching4.pdf)). The survey firm and I matched the firm's online survey pool with a randomly chosen subset of a nationally representative sample. We then recruited participants from the online survey pool from that list. The step by step procedure is as follows.
@@ -51,14 +54,8 @@ $Y_{i} = \beta_{0} + \beta_{1}\textrm{Partisanship/Ideology} + \beta_{2}\textrm{
 ![](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/ate_results_plot.png)
 Figure 1. Estimated Average Treatment Effects
 
-Figure 1 shows the effects of estimated average treatment. The average effect size of direct bias outcomes was small (0.12). Furthermore, these effects were not statistically significant. In contrast, across all condition groups, the effect size of indirect bias was relatively large and statistically significant. South Korean respondents hold biases against North Korean refugees that are five times stronger when primed by indirect (0.35) rather than direct bias (0.07). Furthermore, the fact that South Korean respondents hold indirect biases against North Korean refugees equal in magnitude to their indirect bias against Indonesian migrant workers (0.36) is substantial because many studies have reported on South Koreans' discriminatory behaviors against Indonesian migrant workers
-
 ## Multivarite regression analysis [[Outputs](https://github.com/jaeyk/analyzing-list-experiments/blob/master/outputs/)]
 
 ![](https://github.com/jaeyk/analyzing-list-experiments/raw/master/outputs/multi_combined.png)
 
 Figure 2. Multivariate regression analysis outputs
-
-The top panel shows that political variables were associated with indirect bias against North Korean refugees but in limited ways. Partisanship and ideology were substantially and statistically significantly associated with indirect but not direct bias. Specifically, liberal partisanship (-1.23) and ideology (-1.72) were negatively associated with indirect bias. In contrast, conservative partisanship and political ideology did not have any statistically significant relationship with either of the bias measures.
-
-Income was associated with a biased attitude toward North Korean refugees in contrasting ways, depending on the context. When primed by the direct-bias-sensitive item, the poor respondents agreed more with the item than the rich respondents. This pattern is indicated by the negative income coefficient. However, when primed by the indirect-bias-sensitive item, the rich respondents agreed more with the item than the poor respondents. This pattern was evidenced in the positive income coefficient. More importantly, the effect size of the income effect was large, especially in the direct bias condition. Specifically, the size of income variable for the direct bias measure was on average seven times larger than that of liberal partisan and ideology variables. In contrast, the size of income variable for the indirect bias was on average 45% larger than that of liberal partisan and ideology variables.
