@@ -1,6 +1,4 @@
-# analyzing-list-experiments
-
-**Analyzing List Experiments**
+# Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea
 
 ## Motivation
 
