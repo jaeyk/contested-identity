@@ -1,6 +1,23 @@
-# Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea
+# Replication data and code 
 
-Co-authors: Jae Yeon Kim (jkim@kdischool.ac.kr, corresponding author), [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) 
+- Co-authors: Jae Yeon Kim (jaeyeonkim@kdis.ac.kr, corresponding author), [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) 
+
+- Paper: Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea (R&R at *Political Research Quarterly*)
+
+## Session information 
+
+**Session information**
+
+1. Programming languages
+
+* R version 4.0.4 (2021-02-15)
+* Python 3.8.8
+* Bash 5.1.4(1)-release
+
+2. Operation system
+
+* Platform: x86_64-pc-linux-gnu (64-bit)
+* Running under: Ubuntu 21.04
 
 ## Research design
 
