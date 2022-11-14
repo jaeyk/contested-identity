@@ -1,8 +1,8 @@
 # Replication data and code 
 
-- Co-authors: Jae Yeon Kim (jaeyeonkim@kdis.ac.kr, corresponding author), [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) 
+- Co-authors: Jae Yeon Kim (jkim638@jhu.edu, corresponding author), [Taeku Lee](https://www.law.berkeley.edu/our-faculty/faculty-profiles/taeku-lee/) 
 
-- Paper: Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea (R&R at *Political Research Quarterly*)
+- Paper: Contested Identity and Prejudice Against Co-ethnic Refugees: Evidence from South Korea (Accepted at *Political Research Quarterly*)
 
 ## Session information 
 
